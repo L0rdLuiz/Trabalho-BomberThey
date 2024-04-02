@@ -35,19 +35,25 @@ int main()
         //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
 
-    int m[7][7]={   1,1,1,1,1,1,1,
-                    1,0,0,0,0,0,1,
-                    1,0,0,0,1,1,1,
-                    1,0,0,0,1,0,1,
-                    1,1,0,0,1,0,1,
-                    1,0,0,0,0,0,1,
-                    1,1,1,1,1,1,1};
+    int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
+                    1,0,0,0,2,2,0,0,0,0,0,0,1,
+                    1,2,1,0,1,2,1,0,1,2,1,0,1,
+                    1,2,2,2,2,2,2,2,2,2,2,2,1,
+                    1,0,1,2,1,0,1,2,1,0,1,2,1,
+                    1,2,2,2,2,2,2,2,2,2,2,2,1,
+                    1,2,1,0,1,2,1,0,1,2,1,0,1,
+                    1,2,2,2,2,2,2,2,2,2,2,2,1,
+                    1,2,1,0,1,2,1,0,1,2,1,0,1,
+                    1,2,2,2,2,2,2,2,2,2,2,2,1,
+                    1,0,1,2,1,0,1,0,1,2,1,0,1,
+                    1,0,0,0,0,0,0,0,0,0,0,0,1,
+                    1,1,1,1,1,1,1,1,1,1,1,1,1};
 
     int mov = 0;
 
 
     //Posicao inicial do personagem no console
-    int x=5, y=5;
+    int x=1, y=1;
     //Variavel para tecla precionada
     char tecla;
 
@@ -56,14 +62,16 @@ int main()
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 
         ///Imprime o jogo: mapa e personagem.
-        for(int i=0;i<7;i++){
-            for(int j=0;j<7;j++){
+        for(int i=0;i<13;i++){
+            for(int j=0;j<13;j++){
                 if(i==x && j==y){
                     cout<<char(36); //personagem
                 } else {
                     switch (m[i][j]){
                         case 0: cout<<" "; break; //caminho
                         case 1: cout<<char(219); break; //parede
+                        case 2: cout<<char(35); break; //parede quebravel
+                        case 3: cout<<char(162); break;
                         //default: cout<<"-"; //erro
                     } //fim switch
                 }
@@ -98,6 +106,16 @@ int main()
                     y++;
                     if (colisaoBool(m[x][y])== false) {
                         y--;
+                    };
+                break;
+                case 90: case 'e': ///bomba
+                    //na posição x e y ele solta a bomba
+                    for(int i=0;i<13;i++){
+                        for(int j=0;j<13;j++){
+                            if (m[i==x][j==y]) {
+                                m[x][y] = 3;
+                            }
+                        }
                     };
                 break;
             }
