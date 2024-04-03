@@ -5,6 +5,9 @@
 #include <iostream>
 #include <windows.h>
 #include <conio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
@@ -15,6 +18,12 @@ bool colisaoBool(int p){
     else {
         return true;
     }
+}
+
+void movInimigo(int ix, int iy) {
+    int movMax = rand()%3+1;
+    
+    
 }
 
 int main()
@@ -34,9 +43,11 @@ int main()
         coord.Y = CY;
         //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
+    
+    srand (time(NULL));
 
     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
-                    1,0,0,0,2,2,0,0,0,0,0,0,1,
+                    1,0,0,0,0,0,0,0,0,0,0,0,1,
                     1,2,1,0,1,2,1,0,1,2,1,0,1,
                     1,2,2,2,2,2,2,2,2,2,2,2,1,
                     1,0,1,2,1,0,1,2,1,0,1,2,1,
@@ -54,6 +65,8 @@ int main()
 
     //Posicao inicial do personagem no console
     int x=1, y=1;
+    //Posicao inicial inimigo
+    int ix=11, iy=11;
     //Variavel para tecla precionada
     char tecla;
 
@@ -66,12 +79,15 @@ int main()
             for(int j=0;j<13;j++){
                 if(i==x && j==y){
                     cout<<char(36); //personagem
-                } else {
+                } else if(i==ix && j==iy) {
+                    cout<<char(169); //inimigo
+                    //Botar function do movimento do inimigo
+                }else {
                     switch (m[i][j]){
                         case 0: cout<<" "; break; //caminho
                         case 1: cout<<char(219); break; //parede
                         case 2: cout<<char(35); break; //parede quebravel
-                        case 3: cout<<char(162); break;
+                        case 3: cout<<char(162); break; // bomba
                         //default: cout<<"-"; //erro
                     } //fim switch
                 }
@@ -110,13 +126,16 @@ int main()
                 break;
                 case 90: case 'e': ///bomba
                     //na posição x e y ele solta a bomba
-                    for(int i=0;i<13;i++){
-                        for(int j=0;j<13;j++){
-                            if (m[i==x][j==y]) {
-                                m[x][y] = 3;
-                            }
+                    m[x][y] = 3;
+                    for(int l=0;l<13;l++){
+                        for(int c=0;c<13;c++){
+                           if (m[l][c]==3 && m[l==x][c==y]) {
+                                m[x][y] = 0;
+                           }
                         }
-                    };
+                    }
+
+
                 break;
             }
          }
