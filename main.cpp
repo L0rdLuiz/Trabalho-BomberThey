@@ -20,10 +20,35 @@ bool colisaoBool(int p){
     }
 }
 
-void movInimigo(int ix, int iy) {
+int movInimigo(int ix, int iy) {
+    //Randomificador de quantos movimentos ele irá fazer
     int movMax = rand()%3+1;
-    
-    
+
+    for (int movI = 0; movI<=movMax; movI++) {
+        int movDir = rand()%4+1;
+        switch (movDir) {
+            //para cima
+            case 1:
+                ix--;
+                return(ix);
+            break;
+            //para baixo
+            case 2:
+                ix++;
+                return(ix);
+            break;
+            //para direita
+            case 3:
+                iy++;
+                return(iy);
+            break;
+            //para esquerda
+            case 4:
+                iy--;
+                return(iy);
+            break;
+        }
+    }
 }
 
 int main()
@@ -43,7 +68,7 @@ int main()
         coord.Y = CY;
         //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
-    
+
     srand (time(NULL));
 
     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -81,7 +106,7 @@ int main()
                     cout<<char(36); //personagem
                 } else if(i==ix && j==iy) {
                     cout<<char(169); //inimigo
-                    //Botar function do movimento do inimigo
+                    movInimigo(ix, iy);
                 }else {
                     switch (m[i][j]){
                         case 0: cout<<" "; break; //caminho
