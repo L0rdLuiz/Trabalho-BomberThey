@@ -8,8 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <chrono>
+#include <thread>
+
 
 using namespace std;
+
 
 bool colisaoBool(int p){
     if (p != 0) {
@@ -38,7 +42,10 @@ int main()
         //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
 
+    using namespace chrono;
     srand (time(NULL));
+    milliseconds intervalo(500);
+    auto inicio = high_resolution_clock::now();
 
     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
                     1,0,0,0,0,0,0,0,0,0,0,0,1,
@@ -76,36 +83,41 @@ int main()
                 } else if(i==ix && j==iy) {
                     cout<<char(169); //inimigo
                     //Randomificador de quantos movimentos ele irá fazer
-                    int movDir = rand()%400+1;
-                    switch (movDir) {
-                    //para cima
-                    case 100:
-                        ix--;
-                        if (colisaoBool(m[ix][iy])== false) {
-                            ix++;
-                        };
-                    break;
-                    //para baixo
-                    case 200:
-                        ix++;
-                        if (colisaoBool(m[ix][iy])== false) {
+                    auto atual = high_resolution_clock::now();
+                    auto passou = duration_cast<milliseconds>(atual - inicio);
+                    if (passou >= intervalo) {
+                        int movDir = rand()%4+1;
+                        switch (movDir) {
+                        //para cima
+                        case 1:
                             ix--;
-                        };
-                    break;
-                    //para direita
-                    case 300:
-                        iy++;
-                        if (colisaoBool(m[ix][iy])== false) {
-                            iy--;
-                        };
-                    break;
-                    //para esquerda
-                    case 400:
-                        iy--;
-                        if (colisaoBool(m[ix][iy])== false) {
+                            if (colisaoBool(m[ix][iy])== false) {
+                                ix++;
+                            };
+                        break;
+                        //para baixo
+                        case 2:
+                            ix++;
+                            if (colisaoBool(m[ix][iy])== false) {
+                                ix--;
+                            };
+                        break;
+                        //para direita
+                        case 3:
                             iy++;
-                        };
-                    break;
+                            if (colisaoBool(m[ix][iy])== false) {
+                                iy--;
+                            };
+                        break;
+                        //para esquerda
+                        case 4:
+                            iy--;
+                            if (colisaoBool(m[ix][iy])== false) {
+                                iy++;
+                            };
+                        break;
+                        }
+                    inicio = atual;
                     }
                 }else {
                     switch (m[i][j]){
