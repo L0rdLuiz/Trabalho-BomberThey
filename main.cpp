@@ -20,37 +20,6 @@ bool colisaoBool(int p){
     }
 }
 
-int movInimigo(int ix, int iy) {
-    //Randomificador de quantos movimentos ele irá fazer
-    int movMax = rand()%3+1;
-
-    for (int movI = 0; movI<=movMax; movI++) {
-        int movDir = rand()%4+1;
-        switch (movDir) {
-            //para cima
-            case 1:
-                ix--;
-                return(ix);
-            break;
-            //para baixo
-            case 2:
-                ix++;
-                return(ix);
-            break;
-            //para direita
-            case 3:
-                iy++;
-                return(iy);
-            break;
-            //para esquerda
-            case 4:
-                iy--;
-                return(iy);
-            break;
-        }
-    }
-}
-
 int main()
 {
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
@@ -106,7 +75,38 @@ int main()
                     cout<<char(36); //personagem
                 } else if(i==ix && j==iy) {
                     cout<<char(169); //inimigo
-                    movInimigo(ix, iy);
+                    //Randomificador de quantos movimentos ele irá fazer
+                    int movDir = rand()%400+1;
+                    switch (movDir) {
+                    //para cima
+                    case 100:
+                        ix--;
+                        if (colisaoBool(m[ix][iy])== false) {
+                            ix++;
+                        };
+                    break;
+                    //para baixo
+                    case 200:
+                        ix++;
+                        if (colisaoBool(m[ix][iy])== false) {
+                            ix--;
+                        };
+                    break;
+                    //para direita
+                    case 300:
+                        iy++;
+                        if (colisaoBool(m[ix][iy])== false) {
+                            iy--;
+                        };
+                    break;
+                    //para esquerda
+                    case 400:
+                        iy--;
+                        if (colisaoBool(m[ix][iy])== false) {
+                            iy++;
+                        };
+                    break;
+                    }
                 }else {
                     switch (m[i][j]){
                         case 0: cout<<" "; break; //caminho
