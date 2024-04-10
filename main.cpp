@@ -23,7 +23,6 @@ bool colisaoBool(int p){
         return true;
     }
 }
-
 int main()
 {
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
@@ -45,7 +44,6 @@ int main()
     using namespace chrono;
     srand (time(NULL));
     milliseconds intervalo(500);
-    milliseconds bomba(3000);
     auto inicio = high_resolution_clock::now();
 
     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -61,23 +59,18 @@ int main()
                     1,0,1,2,1,0,1,0,1,2,1,0,1,
                     1,0,0,0,0,0,0,0,0,0,0,0,1,
                     1,1,1,1,1,1,1,1,1,1,1,1,1};
-
     int mov = 0;
-
-
     //Posicao inicial do personagem no console
     int x=1, y=1;
     //Posicao inicial inimigo
     int ix=11, iy=11;
     //Variavel para tecla precionada
-    char tecla;
-    //Posição da bomba
     int bx, by;
-
+    //onde está a bomba
+    char tecla;
     while(true){
         ///Posiciona a escrita no iicio do console
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-
         ///Imprime o jogo: mapa e personagem.
         for(int i=0;i<13;i++){
             for(int j=0;j<13;j++){
@@ -86,9 +79,9 @@ int main()
                 } else if(i==ix && j==iy) {
                     cout<<char(169); //inimigo
                     //Randomificador de quantos movimentos ele irá fazer
-                    auto atualIni = high_resolution_clock::now();
-                    auto passouIni = duration_cast<milliseconds>(atualIni - inicio);
-                    if (passouIni >= intervalo) {
+                    auto atual = high_resolution_clock::now();
+                    auto passou = duration_cast<milliseconds>(atual - inicio);
+                    if (passou >= intervalo) {
                         int movDir = rand()%4+1;
                         switch (movDir) {
                         //para cima
@@ -120,7 +113,7 @@ int main()
                             };
                         break;
                         }
-                    inicio = atualIni;
+                    inicio = atual;
                     }
                 }else {
                     switch (m[i][j]){
@@ -134,7 +127,6 @@ int main()
             }
             cout<<"\n";
         } //fim for mapa
-
         ///executa os movimentos
          if ( _kbhit() ){
             tecla = getch();
@@ -173,32 +165,21 @@ int main()
                         for(int c=0;c<13;c++){
                            if (m[l][c]==3 && m[l==x][c==y]) {
                                 m[x][y] = 0;
-                                bx = 0;
-                                by = 0;
                            }
-                        }
-                    }
 
-                    for (int bi=0; bi<13; bi++) {
-                        for (int bj=0; bj<13; bj++) {
-                            auto atualBomba = high_resolution_clock::now();
-                            auto passouBomba = duration_cast<milliseconds>(atualBomba - inicio);
+                           if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
+                                m[l][c] = 0;
+                            }
 
-                            if (passouBomba >= bomba) {
-                                if (m[bx--][by] != 0 && m[bx--][by] != 1) { //cima
-
-                                } else {
-                                    m[bx--][by] = 0;
-                                }
+                            else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
+                                m[l][c] = 0;
                             }
                         }
                     }
+
                 break;
             }
          }
-
-
     } //fim do laco do jogo
-
     return 0;
 } //fim main
