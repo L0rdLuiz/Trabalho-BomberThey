@@ -45,6 +45,7 @@ int main()
     using namespace chrono;
     srand (time(NULL));
     milliseconds intervalo(500);
+    milliseconds bomba(3000);
     auto inicio = high_resolution_clock::now();
 
     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -70,6 +71,8 @@ int main()
     int ix=11, iy=11;
     //Variavel para tecla precionada
     char tecla;
+    //Posição da bomba
+    int bx, by;
 
     while(true){
         ///Posiciona a escrita no iicio do console
@@ -83,9 +86,9 @@ int main()
                 } else if(i==ix && j==iy) {
                     cout<<char(169); //inimigo
                     //Randomificador de quantos movimentos ele irá fazer
-                    auto atual = high_resolution_clock::now();
-                    auto passou = duration_cast<milliseconds>(atual - inicio);
-                    if (passou >= intervalo) {
+                    auto atualIni = high_resolution_clock::now();
+                    auto passouIni = duration_cast<milliseconds>(atualIni - inicio);
+                    if (passouIni >= intervalo) {
                         int movDir = rand()%4+1;
                         switch (movDir) {
                         //para cima
@@ -117,7 +120,7 @@ int main()
                             };
                         break;
                         }
-                    inicio = atual;
+                    inicio = atualIni;
                     }
                 }else {
                     switch (m[i][j]){
@@ -164,15 +167,32 @@ int main()
                 case 90: case 'e': ///bomba
                     //na posição x e y ele solta a bomba
                     m[x][y] = 3;
+                    bx = x;
+                    by = y;
                     for(int l=0;l<13;l++){
                         for(int c=0;c<13;c++){
                            if (m[l][c]==3 && m[l==x][c==y]) {
                                 m[x][y] = 0;
+                                bx = 0;
+                                by = 0;
                            }
                         }
                     }
 
+                    for (int bi=0; bi<13; bi++) {
+                        for (int bj=0; bj<13; bj++) {
+                            auto atualBomba = high_resolution_clock::now();
+                            auto passouBomba = duration_cast<milliseconds>(atualBomba - inicio);
 
+                            if (passouBomba >= bomba) {
+                                if (m[bx--][by] != 0 && m[bx--][by] != 1) { //cima
+
+                                } else {
+                                    m[bx--][by] = 0;
+                                }
+                            }
+                        }
+                    }
                 break;
             }
          }
