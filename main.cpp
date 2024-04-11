@@ -45,6 +45,7 @@ int main()
     srand (time(NULL));
     milliseconds intervalo(500);
     auto inicio = high_resolution_clock::now();
+    bool bomba = false;
 
     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
                     1,0,0,0,0,0,0,0,0,0,0,0,1,
@@ -158,23 +159,27 @@ int main()
                 break;
                 case 90: case 'e': ///bomba
                     //na posição x e y ele solta a bomba
-                    m[x][y] = 3;
-                    bx = x;
-                    by = y;
-                    for(int l=0;l<13;l++){
-                        for(int c=0;c<13;c++){
-                           if (m[l][c]==3 && m[l==x][c==y]) {
-                                m[x][y] = 0;
-                           }
+                    if (bomba == false) {
+                        m[x][y] = 3;
+                        bx = x;
+                        by = y;
 
-                           if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
-                                m[l][c] = 0;
-                            }
+                        if (m[bx][by] == 3) {
+                            bomba = true;
+                        }
 
-                            else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
-                                m[l][c] = 0;
+                        for (int l = 0; l<13; l++) {
+                            for (int c = 0;c<13; c++) {
+                                if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
+                                    m[l][c] = 0;
+                                } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
+                                    m[l][c] = 0;
+                                }
                             }
                         }
+                    }
+                    else {
+                        m[x][y] = 0;
                     }
 
                 break;
