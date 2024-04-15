@@ -1,7 +1,3 @@
-/**
-    Estrutura inicial para um jogo
-    versão: 0.1 (Prof. Alex,  Adaptado Prof. Felski)
-*/
 #include <iostream>
 #include <windows.h>
 #include <conio.h>
@@ -11,9 +7,7 @@
 #include <chrono>
 #include <thread>
 
-
 using namespace std;
-
 
 bool colisaoBool(int p){
     if (p != 0) {
@@ -23,22 +17,27 @@ bool colisaoBool(int p){
         return true;
     }
 }
+
+bool posicaoValida(int x, int y) {
+    return (x >= 0 && x < 13 && y >= 0 && y < 13);
+}
+
 int main()
 {
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
-        //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
-        HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-        CONSOLE_CURSOR_INFO     cursorInfo;
-        GetConsoleCursorInfo(out, &cursorInfo);
-        cursorInfo.bVisible = false; // set the cursor visibility
-        SetConsoleCursorInfo(out, &cursorInfo);
-        //FIM: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
-        //INICIO: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
-        short int CX=0, CY=0;
-        COORD coord;
-        coord.X = CX;
-        coord.Y = CY;
-        //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
+    //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO     cursorInfo;
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = false; // set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+    //FIM: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
+    //INICIO: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
+    short int CX=0, CY=0;
+    COORD coord;
+    coord.X = CX;
+    coord.Y = CY;
+    //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
 
     using namespace chrono;
@@ -46,6 +45,8 @@ int main()
     milliseconds intervalo(500);
     auto inicio = high_resolution_clock::now();
     bool bomba = false;
+    milliseconds intervaloBomba(3000);
+    auto inicioBomba = high_resolution_clock::now();
 
     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
                     1,0,0,0,0,0,0,0,0,0,0,0,1,
@@ -114,7 +115,7 @@ int main()
                             };
                         break;
                         }
-                    inicio = atual;
+                        inicio = atual;
                     }
                 }else {
                     switch (m[i][j]){
@@ -129,7 +130,7 @@ int main()
             cout<<"\n";
         } //fim for mapa
         ///executa os movimentos
-         if ( _kbhit() ){
+        if ( _kbhit() ){
             tecla = getch();
             switch(tecla)
             {
@@ -157,34 +158,40 @@ int main()
                         y--;
                     };
                 break;
-                case 90: case 'e': ///bomba
-                    //na posição x e y ele solta a bomba
-                    if (bomba == false) {
-                        m[x][y] = 3;
-                        bx = x;
-                        by = y;
-
-                        if (m[bx][by] == 3) {
-                            bomba = true;
-                        }
-
-                        for (int l = 0; l<13; l++) {
-                            for (int c = 0;c<13; c++) {
-                                if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
-                                    m[l][c] = 0;
-                                } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
-                                    m[l][c] = 0;
-                                }
-                            }
-                        }
+                case 'e': ///bomba
+                    if (!bomba) {
+                        m[x][y] = 3; // Coloca a bomba no mapa
+                        bomba = true;
+                        bx=x;
+                        by=y;
+                        inicioBomba = high_resolution_clock::now(); // Armazena o tempo atual
                     }
-                    else {
-                        m[x][y] = 0;
-                    }
-
-                break;
+                    break;
             }
-         }
+        }
+
+        // Verifica se a bomba explodiu após 3 segundos
+        auto agora = high_resolution_clock::now();
+        auto passouBomba = duration_cast<milliseconds>(agora - inicioBomba);
+        if (bomba && passouBomba >= intervaloBomba) {
+            // Explode a bomba
+            m[x][y] = 0; // Remove a bomba do mapa
+            for (int l = 0; l < 13; l++) {
+                for (int c = 0; c < 13; c++) {
+                    if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
+                        m[l][c] = 0;
+                        m[bx][by] = 0;
+                        bomba = false;
+                    } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
+                        m[l][c] = 0;
+                        m[bx][by] = 0;
+                        bomba = false;
+                    }
+                }
+            }
+        }
+
+        // Renderiza o mapa e processa as outras teclas
     } //fim do laco do jogo
     return 0;
 } //fim main
