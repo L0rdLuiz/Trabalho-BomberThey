@@ -18,10 +18,6 @@ bool colisaoBool(int p){
     }
 }
 
-bool posicaoValida(int x, int y) {
-    return (x >= 0 && x < 13 && y >= 0 && y < 13);
-}
-
 int main()
 {
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
