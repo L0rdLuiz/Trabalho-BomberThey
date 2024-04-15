@@ -45,6 +45,9 @@ int main()
     milliseconds flick1Bomba2(2000);
     milliseconds intervaloBomba(3000);
     auto inicioBomba = high_resolution_clock::now();
+    bool vivo = true; //verificador se o player morreu ou nao
+    bool jogo = true; // loop do jogo para o menu depois
+    bool inimigo = true;
 
     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
                     1,0,0,0,0,0,0,0,0,0,0,0,1,
@@ -68,7 +71,7 @@ int main()
     int bx, by;
     //onde está a bomba
     char tecla;
-    while(true){
+    while(jogo == true){
         ///Posiciona a escrita no iicio do console
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
         ///Imprime o jogo: mapa e personagem.
@@ -76,7 +79,11 @@ int main()
             for(int j=0;j<13;j++){
                 if(i==x && j==y){
                     cout<<char(36); //personagem
-                } else if(i==ix && j==iy) {
+                    if (vivo == false) {
+                        jogo = false;
+                    } else {
+                    }
+                } else if(i==ix && j==iy && inimigo == true) {
                     cout<<char(169); //inimigo
                     //Randomificador de quantos movimentos ele irá fazer
                     auto atual = high_resolution_clock::now();
@@ -112,6 +119,9 @@ int main()
                                 iy++;
                             };
                         break;
+                        }
+                        if (ix == x && iy == y) {
+                                vivo = false;
                         }
                         inicio = atual;
                     }
@@ -196,10 +206,22 @@ int main()
                     if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
                         m[l][c] = 0;
                         m[bx][by] = 0;
+                        if (l == x && c == y || bx == x && by == y) {
+                            vivo = false;
+                        }
+                        else if (l == ix && c == iy || ix == x && iy == y) {
+                            vivo = false;
+                        }
                         bomba = false;
                     } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
                         m[l][c] = 0;
                         m[bx][by] = 0;
+                        if (l == x && c == y) {
+                            inimigo = false;
+                        }
+                        else if (l == ix && c == iy) {
+                            inimigo = false;
+                        }
                         bomba = false;
                     }
                 }
@@ -207,5 +229,9 @@ int main()
         }
 
     } //fim do laco do jogo
+
+    //Fazer um clear da tela e a pessoa poder escolher oque quer e ver a pontuação
+
+    cout<<"Game Over";
     return 0;
 } //fim main
