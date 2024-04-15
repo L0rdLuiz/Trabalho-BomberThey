@@ -41,6 +41,8 @@ int main()
     milliseconds intervalo(500);
     auto inicio = high_resolution_clock::now();
     bool bomba = false;
+    milliseconds flick1Bomba1(1000);
+    milliseconds flick1Bomba2(2000);
     milliseconds intervaloBomba(3000);
     auto inicioBomba = high_resolution_clock::now();
 
@@ -119,6 +121,8 @@ int main()
                         case 1: cout<<char(219); break; //parede
                         case 2: cout<<char(35); break; //parede quebravel
                         case 3: cout<<char(162); break; // bomba
+                        case 4: cout<<char(79); break; // bomba Flick
+                        case 5: cout<<char(88); break; // area de explosão
                         //default: cout<<"-"; //erro
                     } //fim switch
                 }
@@ -169,9 +173,24 @@ int main()
         // Verifica se a bomba explodiu após 3 segundos
         auto agora = high_resolution_clock::now();
         auto passouBomba = duration_cast<milliseconds>(agora - inicioBomba);
+        if (bomba && passouBomba >= flick1Bomba1) {
+            m[bx][by] = 3;
+            for (int l = 0; l < 13; l++) {
+                for (int c = 0; c < 13; c++) {
+                    if ((l==bx+1 && c == by && m[l][c] == 0) || (l==bx-1 && c == by && m[l][c] == 0)) { //para baixo e para cima explosão
+                        m[l][c] = 5;
+                    } else if ((l == bx && c == by-1 && m[l][c] == 0) || (l == bx && c == by+1 && m[l][c] == 0)) { //para direita e para esquerda explosão
+                        m[l][c] = 5;
+                    }
+                }
+            }
+        }
+        if (bomba && passouBomba >= flick1Bomba2) {
+            m[bx][by] = 4;
+        }
         if (bomba && passouBomba >= intervaloBomba) {
             // Explode a bomba
-            m[x][y] = 0; // Remove a bomba do mapa
+            m[bx][by] = 3;
             for (int l = 0; l < 13; l++) {
                 for (int c = 0; c < 13; c++) {
                     if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
@@ -187,7 +206,6 @@ int main()
             }
         }
 
-        // Renderiza o mapa e processa as outras teclas
     } //fim do laco do jogo
     return 0;
 } //fim main
