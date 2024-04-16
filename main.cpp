@@ -50,26 +50,32 @@ int main()
         auto inicioBomba = high_resolution_clock::now();
         bool vivo = true; //verificador se o player morreu ou nao
         bool jogo = true; // loop do jogo para o menu depois
-        bool inimigo = true;
+        bool inimigo1 = true; //Booleano do inimigo
+        bool inimigo2 = true;
+        bool inimigo3 = true;
 
         int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
-                        1,0,0,0,0,0,0,0,0,0,0,0,1,
-                        1,2,1,0,1,2,1,0,1,2,1,0,1,
-                        1,2,2,2,2,2,2,2,2,2,2,2,1,
+                        1,0,0,0,2,2,2,2,2,0,0,0,1,
+                        1,0,1,0,1,2,1,0,1,0,1,0,1,
+                        1,0,0,0,2,2,2,2,2,0,0,0,1,
                         1,0,1,2,1,0,1,2,1,0,1,2,1,
                         1,2,2,2,2,2,2,2,2,2,2,2,1,
                         1,2,1,0,1,2,1,0,1,2,1,0,1,
                         1,2,2,2,2,2,2,2,2,2,2,2,1,
                         1,2,1,0,1,2,1,0,1,2,1,0,1,
-                        1,2,2,2,2,2,2,2,2,2,2,2,1,
-                        1,0,1,2,1,0,1,0,1,2,1,0,1,
-                        1,0,0,0,0,0,0,0,0,0,0,0,1,
+                        1,0,0,0,2,2,2,2,2,0,0,0,1,
+                        1,0,1,0,1,0,1,0,1,0,1,0,1,
+                        1,0,0,0,2,2,2,2,2,0,0,0,1,
                         1,1,1,1,1,1,1,1,1,1,1,1,1};
         int mov = 0;
         //Posicao inicial do personagem no console
         int x=1, y=1;
-        //Posicao inicial inimigo
-        int ix=11, iy=11;
+        //Posicao inicial inimigo1
+        int ix1=11, iy1=11;
+        //Posicao inicial inimigo2
+        int ix2=11, iy2=1;
+        //Posicao inicial inimigo3
+        int ix3=1, iy3=11;
         //Variavel para tecla precionada
         int bx, by;
         //onde está a bomba
@@ -85,46 +91,116 @@ int main()
                         cout<<char(36); //personagem
                         if (vivo == false) {
                             jogo = false;
-                        } else {
                         }
-                    } else if(i==ix && j==iy && inimigo == true) {
+                    } else if((i==ix1 && j==iy1 && inimigo1 == true) || (i==ix2 && j==iy2 && inimigo2 == true) || (i==ix3 && j==iy3 && inimigo3 == true)) {
                         cout<<char(169); //inimigo
                         //Randomificador de quantos movimentos ele irá fazer
                         auto atual = high_resolution_clock::now();
                         auto passou = duration_cast<milliseconds>(atual - inicio);
                         if (passou >= intervalo) {
-                            int movDir = rand()%4+1;
-                            switch (movDir) {
+                            //Inimigo 1
+                            int movDir1 = rand()%4+1;
+                            switch (movDir1) {
                             //para cima
                             case 1:
-                                ix--;
-                                if (colisaoBool(m[ix][iy])== false) {
-                                    ix++;
+                                ix1--;
+                                if (colisaoBool(m[ix1][iy1])== false) {
+                                    ix1++;
                                 };
                             break;
                             //para baixo
                             case 2:
-                                ix++;
-                                if (colisaoBool(m[ix][iy])== false) {
-                                    ix--;
+                                ix1++;
+                                if (colisaoBool(m[ix1][iy1])== false) {
+                                    ix1--;
                                 };
                             break;
                             //para direita
                             case 3:
-                                iy++;
-                                if (colisaoBool(m[ix][iy])== false) {
-                                    iy--;
+                                iy1++;
+                                if (colisaoBool(m[ix1][iy1])== false) {
+                                    iy1--;
                                 };
                             break;
                             //para esquerda
                             case 4:
-                                iy--;
-                                if (colisaoBool(m[ix][iy])== false) {
-                                    iy++;
+                                iy1--;
+                                if (colisaoBool(m[ix1][iy1])== false) {
+                                    iy1++;
                                 };
                             break;
                             }
-                            if (ix == x && iy == y) {
+                            if (ix1 == x && iy1 == y && inimigo1 == true) {
+                                    vivo = false;
+                            }
+                            //Inimigo 2
+                            int movDir2 = rand()%4+1;
+                            switch (movDir2) {
+                            //para cima
+                            case 1:
+                                ix2--;
+                                if (colisaoBool(m[ix2][iy2])== false) {
+                                    ix2++;
+                                };
+                            break;
+                            //para baixo
+                            case 2:
+                                ix2++;
+                                if (colisaoBool(m[ix2][iy2])== false) {
+                                    ix2--;
+                                };
+                            break;
+                            //para direita
+                            case 3:
+                                iy2++;
+                                if (colisaoBool(m[ix2][iy2])== false) {
+                                    iy2--;
+                                };
+                            break;
+                            //para esquerda
+                            case 4:
+                                iy2--;
+                                if (colisaoBool(m[ix2][iy2])== false) {
+                                    iy2++;
+                                };
+                            break;
+                            }
+                            if (ix2 == x && iy2 == y && inimigo2 == true) {
+                                    vivo = false;
+                            }
+                            //Inimigo 3
+                            int movDir3 = rand()%4+1;
+                            switch (movDir3) {
+                            //para cima
+                            case 1:
+                                ix3--;
+                                if (colisaoBool(m[ix3][iy3])== false) {
+                                    ix3++;
+                                };
+                            break;
+                            //para baixo
+                            case 2:
+                                ix3++;
+                                if (colisaoBool(m[ix3][iy3])== false) {
+                                    ix3--;
+                                };
+                            break;
+                            //para direita
+                            case 3:
+                                iy3++;
+                                if (colisaoBool(m[ix3][iy3])== false) {
+                                    iy3--;
+                                };
+                            break;
+                            //para esquerda
+                            case 4:
+                                iy3--;
+                                if (colisaoBool(m[ix3][iy3])== false) {
+                                    iy3++;
+                                };
+                            break;
+                            }
+                            if (ix3 == x && iy3 == y && inimigo3 == true) {
                                     vivo = false;
                             }
                             inicio = atual;
@@ -184,6 +260,11 @@ int main()
                 }
             }
 
+            if (inimigo1 == false && inimigo2 == false && inimigo3 == false) {
+                jogo = false;
+                break;
+            }
+
             // Verifica se a bomba explodiu após 3 segundos
             auto agora = high_resolution_clock::now();
             auto passouBomba = duration_cast<milliseconds>(agora - inicioBomba);
@@ -210,21 +291,33 @@ int main()
                         if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
                             m[l][c] = 0;
                             m[bx][by] = 0;
-                            if (l == x && c == y || bx == x && by == y) {
+                            if ((l == x && c == y) || (bx == x && by == y)) {
                                 vivo = false;
                             }
-                            else if (l == ix && c == iy || ix == x && iy == y) {
-                                vivo = false;
+                            else if (l == ix1 && c == iy1 || ix1 == x && iy1 == y) {
+                                inimigo1 = false;
+                            }
+                            else if (l == ix2 && c == iy2 || ix2 == x && iy2 == y) {
+                                inimigo2 = false;
+                            }
+                            else if (l == ix3 && c == iy3 || ix3 == x && iy3 == y) {
+                                inimigo3 = false;
                             }
                             bomba = false;
                         } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
                             m[l][c] = 0;
                             m[bx][by] = 0;
                             if (l == x && c == y) {
-                                inimigo = false;
+                                vivo = false;
                             }
-                            else if (l == ix && c == iy) {
-                                inimigo = false;
+                            else if (l == ix1 && c == iy1) {
+                                inimigo1 = false;
+                            }
+                            else if (l == ix2 && c == iy2) {
+                                inimigo2 = false;
+                            }
+                            else if (l == ix3 && c == iy3) {
+                                inimigo3 = false;
                             }
                             bomba = false;
                         }
@@ -237,14 +330,18 @@ int main()
 
         system("cls");
 
-        if (inimigo == false) {
+        if (inimigo1 == false && inimigo2 == false && inimigo3 == false) {
             cout<<"Você matou todos os inimigos e ganhou o jogo, parabéns!"<<endl;
+            cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
+            cout<<"Professor: Alex Luciano"<<endl;
             cout<<"Quer jogar novamente?"<<endl;
             cout<<"Digite 1 para jogar de novo ou 0 para sair"<<endl;
             cin>>repetir;
         }
         if (vivo == false) {
             cout<<"Você perdeu o jogo"<<endl;
+            cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
+            cout<<"Professor: Alex Luciano"<<endl;
             cout<<"Quer jogar novamente?"<<endl;
             cout<<"Digite 1 para jogar de novo ou 0 para sair"<<endl;
             cin>>repetir;
