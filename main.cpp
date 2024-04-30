@@ -10,7 +10,7 @@
 using namespace std;
 
 bool colisaoBool(int p){
-    if (p != 0 && p!= 5) {
+    if (p != 0 && p!= 5 && p!=6) {
         return false;
     }
     else {
@@ -46,6 +46,7 @@ int main()
         bool bomba = false;
         milliseconds flick1Bomba1(1000);
         milliseconds flick1Bomba2(2000);
+        milliseconds flickExplosao(2500);
         milliseconds intervaloBomba(3000);
         auto inicioBomba = high_resolution_clock::now();
         bool vivo = true; //verificador se o player morreu ou nao
@@ -67,7 +68,6 @@ int main()
                         1,0,1,0,1,0,1,0,1,0,1,0,1,
                         1,0,0,0,2,2,2,2,2,0,0,0,1,
                         1,1,1,1,1,1,1,1,1,1,1,1,1};
-        int mov = 0;
         //Posicao inicial do personagem no console
         int x=1, y=1;
         //Posicao inicial inimigo1
@@ -213,6 +213,7 @@ int main()
                             case 3: cout<<char(162); break; // bomba
                             case 4: cout<<char(79); break; // bomba Flick
                             case 5: cout<<char(88); break; // area de explosão
+                            case 6: cout<<char(157); break; // explosao
                             //default: cout<<"-"; //erro
                         } //fim switch
                     }
@@ -283,6 +284,18 @@ int main()
             if (bomba && passouBomba >= flick1Bomba2) {
                 m[bx][by] = 4;
             }
+            if (bomba && passouBomba >= flickExplosao) {
+                m[bx][by] = 6;
+                for (int l = 0; l < 13; l++) {
+                    for (int c = 0; c < 13; c++) {
+                        if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
+                            m[l][c] = 6;
+                        } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
+                            m[l][c] = 6;
+                        }
+                    }
+                }
+            }
             if (bomba && passouBomba >= intervaloBomba) {
                 // Explode a bomba
                 m[bx][by] = 3;
@@ -294,13 +307,13 @@ int main()
                             if ((l == x && c == y) || (bx == x && by == y)) {
                                 vivo = false;
                             }
-                            else if (l == ix1 && c == iy1 || ix1 == x && iy1 == y) {
+                            else if ((l == ix1 && c == iy1) || (ix1 == x && iy1 == y)) {
                                 inimigo1 = false;
                             }
-                            else if (l == ix2 && c == iy2 || ix2 == x && iy2 == y) {
+                            else if ((l == ix2 && c == iy2) || (ix2 == x && iy2 == y)) {
                                 inimigo2 = false;
                             }
-                            else if (l == ix3 && c == iy3 || ix3 == x && iy3 == y) {
+                            else if ((l == ix3 && c == iy3) || (ix3 == x && iy3 == y)) {
                                 inimigo3 = false;
                             }
                             bomba = false;
@@ -319,7 +332,6 @@ int main()
                             else if (l == ix3 && c == iy3) {
                                 inimigo3 = false;
                             }
-                            bomba = false;
                         }
                     }
                 }
