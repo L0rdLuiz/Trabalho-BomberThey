@@ -18,9 +18,67 @@ bool colisaoBool(int p){
     }
 }
 
+void flick (int m[13][13], int bx, int by, bool Explosao) {
+    if (Explosao == false) {
+        for (int l = 0; l < 13; l++) {
+            for (int c = 0; c < 13; c++) {
+                if ((l==bx+1 && c == by && m[l][c] == 0) || (l==bx-1 && c == by && m[l][c] == 0)) { //para baixo e para cima explosão
+                    m[l][c] = 5;
+                } else if ((l == bx && c == by-1 && m[l][c] == 0) || (l == bx && c == by+1 && m[l][c] == 0)) { //para direita e para esquerda explosão
+                    m[l][c] = 5;
+                }
+            }
+        }
+    }else {
+         for (int l = 0; l < 13; l++) {
+            for (int c = 0; c < 13; c++) {
+                if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
+                    m[l][c] = 6;
+                } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
+                    m[l][c] = 6;
+                }
+            }
+        }
+    }
+}
+
+void movInimigo (int m[13][13], int &ix, int &iy) {
+    int movDir = rand()%4+1;
+        switch (movDir) {
+        //para cima
+        case 1:
+            ix--;
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6) {
+                ix++;
+            }
+        break;
+        //para baixo
+        case 2:
+            ix++;
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6) {
+                ix--;
+            }
+        break;
+        //para direita
+        case 3:
+            iy++;
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6) {
+                iy--;
+            }
+        break;
+        //para esquerda
+        case 4:
+            iy--;
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6) {
+                iy++;
+            }
+        break;
+        }
+}
+
 int main()
 {
-    ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
+    ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.movInimigo(m, ix1, iy1);
     //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_CURSOR_INFO     cursorInfo;
@@ -54,6 +112,7 @@ int main()
         bool inimigo1 = true; //Booleano do inimigo
         bool inimigo2 = true;
         bool inimigo3 = true;
+        bool Explosao = false;
 
         int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
                         1,0,0,0,2,2,2,2,2,0,0,0,1,
@@ -99,107 +158,17 @@ int main()
                         auto passou = duration_cast<milliseconds>(atual - inicio);
                         if (passou >= intervalo) {
                             //Inimigo 1
-                            int movDir1 = rand()%4+1;
-                            switch (movDir1) {
-                            //para cima
-                            case 1:
-                                ix1--;
-                                if (colisaoBool(m[ix1][iy1])== false) {
-                                    ix1++;
-                                };
-                            break;
-                            //para baixo
-                            case 2:
-                                ix1++;
-                                if (colisaoBool(m[ix1][iy1])== false) {
-                                    ix1--;
-                                };
-                            break;
-                            //para direita
-                            case 3:
-                                iy1++;
-                                if (colisaoBool(m[ix1][iy1])== false) {
-                                    iy1--;
-                                };
-                            break;
-                            //para esquerda
-                            case 4:
-                                iy1--;
-                                if (colisaoBool(m[ix1][iy1])== false) {
-                                    iy1++;
-                                };
-                            break;
-                            }
+                            movInimigo(m, ix1, iy1);
                             if (ix1 == x && iy1 == y && inimigo1 == true) {
                                     vivo = false;
                             }
                             //Inimigo 2
-                            int movDir2 = rand()%4+1;
-                            switch (movDir2) {
-                            //para cima
-                            case 1:
-                                ix2--;
-                                if (colisaoBool(m[ix2][iy2])== false) {
-                                    ix2++;
-                                };
-                            break;
-                            //para baixo
-                            case 2:
-                                ix2++;
-                                if (colisaoBool(m[ix2][iy2])== false) {
-                                    ix2--;
-                                };
-                            break;
-                            //para direita
-                            case 3:
-                                iy2++;
-                                if (colisaoBool(m[ix2][iy2])== false) {
-                                    iy2--;
-                                };
-                            break;
-                            //para esquerda
-                            case 4:
-                                iy2--;
-                                if (colisaoBool(m[ix2][iy2])== false) {
-                                    iy2++;
-                                };
-                            break;
-                            }
+                            movInimigo(m, ix2, iy2);
                             if (ix2 == x && iy2 == y && inimigo2 == true) {
                                     vivo = false;
                             }
                             //Inimigo 3
-                            int movDir3 = rand()%4+1;
-                            switch (movDir3) {
-                            //para cima
-                            case 1:
-                                ix3--;
-                                if (colisaoBool(m[ix3][iy3])== false) {
-                                    ix3++;
-                                };
-                            break;
-                            //para baixo
-                            case 2:
-                                ix3++;
-                                if (colisaoBool(m[ix3][iy3])== false) {
-                                    ix3--;
-                                };
-                            break;
-                            //para direita
-                            case 3:
-                                iy3++;
-                                if (colisaoBool(m[ix3][iy3])== false) {
-                                    iy3--;
-                                };
-                            break;
-                            //para esquerda
-                            case 4:
-                                iy3--;
-                                if (colisaoBool(m[ix3][iy3])== false) {
-                                    iy3++;
-                                };
-                            break;
-                            }
+                            movInimigo(m, ix3, iy3);
                             if (ix3 == x && iy3 == y && inimigo3 == true) {
                                     vivo = false;
                             }
@@ -271,30 +240,16 @@ int main()
             auto passouBomba = duration_cast<milliseconds>(agora - inicioBomba);
             if (bomba && passouBomba >= flick1Bomba1) {
                 m[bx][by] = 3;
-                for (int l = 0; l < 13; l++) {
-                    for (int c = 0; c < 13; c++) {
-                        if ((l==bx+1 && c == by && m[l][c] == 0) || (l==bx-1 && c == by && m[l][c] == 0)) { //para baixo e para cima explosão
-                            m[l][c] = 5;
-                        } else if ((l == bx && c == by-1 && m[l][c] == 0) || (l == bx && c == by+1 && m[l][c] == 0)) { //para direita e para esquerda explosão
-                            m[l][c] = 5;
-                        }
-                    }
-                }
+                flick(m,bx,by, Explosao);
             }
             if (bomba && passouBomba >= flick1Bomba2) {
                 m[bx][by] = 4;
             }
             if (bomba && passouBomba >= flickExplosao) {
                 m[bx][by] = 6;
-                for (int l = 0; l < 13; l++) {
-                    for (int c = 0; c < 13; c++) {
-                        if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
-                            m[l][c] = 6;
-                        } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
-                            m[l][c] = 6;
-                        }
-                    }
-                }
+                Explosao = true;
+                flick(m,bx,by,Explosao);
+                Explosao = false;
             }
             if (bomba && passouBomba >= intervaloBomba) {
                 // Explode a bomba
