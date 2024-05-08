@@ -10,15 +10,28 @@
 using namespace std;
 
 struct player {
-
+    bool vivo;
+    int x;
+    int y;
+    bool vidaExtra;
+    int pontuacao;
+    int movUtilizado;
+    int bombaGasta;
 };
 
 struct inimigo {
-
+    bool iniVivo;
+    int difInimigo;
+    int ix;
+    int iy;
 };
 
 struct bomba {
-
+    int maxBomba;
+    int distBomba;
+    bool bombaRelogio;
+    int bx;
+    int by;
 };
 
 bool colisaoBool(int p){
@@ -112,7 +125,14 @@ int main()
 
     do{
         system("cls");
-        cout<<"Bomberman (Fazer algo mais bonito depois)"<<endl;
+        cout << R"(
+         ______     ______     __    __     ______     ______     ______     __    __     ______     __   __
+        /\  == \   /\  __ \   /\ "-./  \   /\  == \   /\  ___\   /\  == \   /\ "-./  \   /\  __ \   /\ "-.\ \
+        \ \  __<   \ \ \/\ \  \ \ \-./\ \  \ \  __<   \ \  __\   \ \  __<   \ \ \-./\ \  \ \  __ \  \ \ \-.  \
+         \ \_____\  \ \_____\  \ \_\ \ \_\  \ \_____\  \ \_____\  \ \_\ \_\  \ \_\ \ \_\  \ \_\ \_\  \ \_\\"\_\
+          \/_____/   \/_____/   \/_/  \/_/   \/_____/   \/_____/   \/_/ /_/   \/_/  \/_/   \/_/\/_/   \/_/ \/_/
+
+)" << endl;
         cout<<"Jogar (1)"<<endl;
         cout<<"Dificuldade (2)"<<endl;
         cout<<"Sobre o Jogo (3)"<<endl;
@@ -154,7 +174,7 @@ int main()
                                     1,0,1,0,1,0,1,0,1,0,1,0,1,
                                     1,0,0,0,2,2,2,2,2,0,0,0,1,
                                     1,1,1,1,1,1,1,1,1,1,1,1,1};
-                    //Posicao inicial do personagem no console
+                    //Posicao inicial do personagem no consolewhile(menu != 5);
                     int x=1, y=1;
                     //Posicao inicial inimigo1
                     int ix1=11, iy1=11;
@@ -353,7 +373,32 @@ int main()
                 break;
             case 3:
                 system("cls");
-                cout<<"Sobre o Jogo:"<<endl;
+                cout<<"Sobre o Jogo:"<<endl<<endl;
+                cout<<"Como jogar:"<<endl;
+                cout<<"Bomberman e um classico jogo de estrategia e acao, onde os jogadores assumem o papel de um"<<endl;
+                cout<<"personagem que deve abrir caminho atraves de labirintos cheios de inimigos e obstaculos. O objetivo"<<endl;
+                cout<<"principal e destruir todos os inimigos e alcancar a saida do labirinto sem ser derrotado."<<endl <<endl;
+                cout<<"Como Jogar:"<<endl<<endl;
+                cout<<"Movimento: O jogador controla Bomberman usando as teclas A (esquerda), S (baixo), W (cima) e D "<<endl;
+                cout<<"(direita) do teclado, movendo-o pelo labirinto."<<endl;
+                cout<<"Colocar Bombas: Bomberman pode colocar bombas para destruir obstaculos e inimigos. As "<<endl;
+                cout<<"bombas sao colocadas pressionando a tecla E do teclado e explodem apos um certo periodo de "<<endl;
+                cout<<"tempo."<<endl;
+                cout<<"Evitar Explosoes: As bombas explodem em uma determinada area, entao e importante para o "<<endl;
+                cout<<"jogador se manter fora do alcance das explosoes para nao ser atingido."<<endl;
+                cout<<"Destruir Obstaculos: As bombas podem ser usadas para destruir paredes e outros obstaculos no "<<endl;
+                cout<<"labirinto, abrindo caminho para o jogador avancar."<<endl;
+                cout<<"Derrotar Inimigos: Os inimigos podem ser derrotados ao serem pegos nas explosoes das bombas. E "<<endl;
+                cout<<"importante planejar estrategicamente as explosoes para pegar o maior numero possivel de inimigos "<<endl;
+                cout<<"de uma so vez."<<endl;
+                cout<<"Cuidado com os Inimigos: Os inimigos se movem pelo labirinto e tentam atacar Bomberman. Eles "<<endl;
+                cout<<"podem derrota-lo se o tocarem, entao e importante evitar contato direto com eles."<<endl;
+                cout<<"Colete Itens: Durante o jogo, diversos itens podem aparecer no labirinto, como power-ups para "<<endl;
+                cout<<"aumentar a capacidade das bombas ou a velocidade de movimento de Bomberman. Colete esses itens"<<endl;
+                cout<<"para melhorar suas chances de sobrevivencia."<<endl;
+                cout<<endl<<endl;
+                cout<<"Pontuacao:"<<endl<<endl;
+                cout<<"Sistema de Pontuacao";
                 system("pause");
                 break;
             case 4:
