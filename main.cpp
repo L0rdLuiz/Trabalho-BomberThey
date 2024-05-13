@@ -11,8 +11,6 @@ using namespace std;
 
 struct player {
     bool vivo;
-    int x;
-    int y;
     bool vidaExtra;
     int pontuacao;
     int movUtilizado;
@@ -27,11 +25,12 @@ struct inimigo {
 };
 
 struct bomba {
-    int maxBomba;
+    int maxBomba = 1;
     int distBomba;
     bool bombaRelogio;
     int bx;
     int by;
+    int bombaAtual;
 };
 
 bool colisaoBool(int p){
@@ -148,13 +147,19 @@ int main()
                     srand (time(NULL));
                     milliseconds intervalo(500);
                     auto inicio = high_resolution_clock::now();
-                    bool bomba = false;
+                    bool bombaColocada = false;
+                    bomba b1;
+                    player p1;
+                    p1.vivo = true;
+                    p1.bombaGasta = 0;
+                    p1.movUtilizado = 0;
+                    p1.vidaExtra = 0;
+                    p1.pontuacao = 0;
                     milliseconds flick1Bomba1(1000);
                     milliseconds flick1Bomba2(2000);
                     milliseconds flickExplosao(2500);
                     milliseconds intervaloBomba(3000);
                     auto inicioBomba = high_resolution_clock::now();
-                    bool vivo = true; //verificador se o player morreu ou nao
                     bool jogo = true; // loop do jogo para o menu depois
                     bool inimigo1 = true; //Booleano do inimigo
                     bool inimigo2 = true;
@@ -182,8 +187,6 @@ int main()
                     int ix2=11, iy2=1;
                     //Posicao inicial inimigo3
                     int ix3=1, iy3=11;
-                    //Variavel para tecla precionada
-                    int bx, by;
                     //onde está a bomba
                     char tecla;
 
@@ -195,7 +198,7 @@ int main()
                             for(int j=0;j<13;j++){
                                 if(i==x && j==y){
                                     cout<<char(36); //personagem
-                                    if (vivo == false) {
+                                    if (p1.vivo == false) {
                                         jogo = false;
                                     }
                                 } else if((i==ix1 && j==iy1 && inimigo1 == true) || (i==ix2 && j==iy2 && inimigo2 == true) || (i==ix3 && j==iy3 && inimigo3 == true)) {
@@ -207,17 +210,17 @@ int main()
                                         //Inimigo 1
                                         movInimigo(m, ix1, iy1);
                                         if (ix1 == x && iy1 == y && inimigo1 == true) {
-                                                vivo = false;
+                                                p1.vivo = false;
                                         }
                                         //Inimigo 2
                                         movInimigo(m, ix2, iy2);
                                         if (ix2 == x && iy2 == y && inimigo2 == true) {
-                                                vivo = false;
+                                                p1.vivo = false;
                                         }
                                         //Inimigo 3
                                         movInimigo(m, ix3, iy3);
                                         if (ix3 == x && iy3 == y && inimigo3 == true) {
-                                                vivo = false;
+                                                p1.vivo = false;
                                         }
                                         inicio = atual;
                                     }
@@ -243,35 +246,48 @@ int main()
                             {
                                 case 72: case 'w': ///cima
                                     x--;
+                                    p1.movUtilizado += 1;
                                     if (colisaoBool(m[x][y])== false) {
                                         x++;
+                                        p1.movUtilizado -= 1;
                                     };
                                 break;
                                 case 80: case 's': ///baixo
                                     x++;
+                                    p1.movUtilizado += 1;
                                     if (colisaoBool(m[x][y])== false) {
                                         x--;
+                                        p1.movUtilizado -= 1;
                                     };
                                 break;
                                 case 75:case 'a': ///esquerda
                                     y--;
+                                    p1.movUtilizado += 1;
                                     if (colisaoBool(m[x][y])== false) {
                                         y++;
+                                        p1.movUtilizado -= 1;
                                     };
                                 break;
                                 case 77: case 'd': ///direita
                                     y++;
+                                    p1.movUtilizado += 1;
                                     if (colisaoBool(m[x][y])== false) {
                                         y--;
+                                        p1.movUtilizado -= 1;
                                     };
                                 break;
                                 case 'e': ///bomba
-                                    if (!bomba) {
+                                    if (!bombaColocada) {
                                         m[x][y] = 3; // Coloca a bomba no mapa
-                                        bomba = true;
-                                        bx=x;
-                                        by=y;
+
+                                        b1.bombaRelogio = false;
+                                        b1.bx = x;
+                                        b1.by = y;
+                                        b1.distBomba = 1; //Quando fizer o power up da bomba colocar aqui
+                                        b1.bombaAtual = 1;
                                         inicioBomba = high_resolution_clock::now(); // Armazena o tempo atual
+                                        bombaColocada = true;
+                                        p1.bombaGasta += 1;
                                     }
                                     break;
                             }
@@ -285,29 +301,29 @@ int main()
                         // Verifica se a bomba explodiu após 3 segundos
                         auto agora = high_resolution_clock::now();
                         auto passouBomba = duration_cast<milliseconds>(agora - inicioBomba);
-                        if (bomba && passouBomba >= flick1Bomba1) {
-                            m[bx][by] = 3;
-                            flick(m,bx,by, Explosao);
+                        if (bombaColocada && passouBomba >= flick1Bomba1) {
+                            m[b1.bx][b1.by] = 3;
+                            flick(m,b1.bx,b1.by, Explosao);
                         }
-                        if (bomba && passouBomba >= flick1Bomba2) {
-                            m[bx][by] = 4;
+                        if (bombaColocada && passouBomba >= flick1Bomba2) {
+                            m[b1.bx][b1.by] = 4;
                         }
-                        if (bomba && passouBomba >= flickExplosao) {
-                            m[bx][by] = 6;
+                        if (bombaColocada && passouBomba >= flickExplosao) {
+                            m[b1.bx][b1.by] = 6;
                             Explosao = true;
-                            flick(m,bx,by,Explosao);
+                            flick(m,b1.bx,b1.by,Explosao);
                             Explosao = false;
                         }
-                        if (bomba && passouBomba >= intervaloBomba) {
+                        if (bombaColocada && passouBomba >= intervaloBomba) {
                             // Explode a bomba
-                            m[bx][by] = 3;
+                            m[b1.bx][b1.by] = 3;
                             for (int l = 0; l < 13; l++) {
                                 for (int c = 0; c < 13; c++) {
-                                    if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
+                                    if ((l==b1.bx+b1.distBomba && c == b1.by && m[l][c] != 1) || (l==b1.bx-b1.distBomba && c == b1.by && m[l][c] != 1)) { //para baixo e para cima explosão
                                         m[l][c] = 0;
-                                        m[bx][by] = 0;
-                                        if ((l == x && c == y) || (bx == x && by == y)) {
-                                            vivo = false;
+                                        m[b1.bx][b1.by] = 0;
+                                        if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                            p1.vivo = false;
                                         }
                                         else if ((l == ix1 && c == iy1) || (ix1 == x && iy1 == y)) {
                                             inimigo1 = false;
@@ -318,12 +334,13 @@ int main()
                                         else if ((l == ix3 && c == iy3) || (ix3 == x && iy3 == y)) {
                                             inimigo3 = false;
                                         }
-                                        bomba = false;
-                                    } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
+                                        bombaColocada = false;
+                                        b1.bombaAtual -= 1;
+                                    } else if ((l == b1.bx && c == b1.by-b1.distBomba && m[l][c] != 1) || (l == b1.bx && c == b1.by+b1.distBomba && m[l][c] != 1)) { //para direita e para esquerda explosão
                                         m[l][c] = 0;
-                                        m[bx][by] = 0;
+                                        m[b1.bx][b1.by] = 0;
                                         if (l == x && c == y) {
-                                            vivo = false;
+                                            p1.vivo = false;
                                         }
                                         else if (l == ix1 && c == iy1) {
                                             inimigo1 = false;
@@ -339,6 +356,7 @@ int main()
                             }
                         }
 
+                    cout<<"Bomba: "<<p1.bombaGasta<<" Movimento: "<<p1.movUtilizado<<" Pontuacao: "<<p1.pontuacao;
                     } //fim do laco do jogo
 
 
@@ -352,7 +370,7 @@ int main()
                         cout<<"Digite 1 para jogar de novo ou 0 para sair"<<endl;
                         cin>>repetir;
                     }
-                    if (vivo == false) {
+                    if (p1.vivo == false) {
                         cout<<"Você perdeu o jogo"<<endl;
                         cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
                         cout<<"Professor: Alex Luciano"<<endl;
