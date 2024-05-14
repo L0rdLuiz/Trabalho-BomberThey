@@ -165,6 +165,7 @@ int main()
                     bool inimigo2 = true;
                     bool inimigo3 = true;
                     bool Explosao = false;
+                    auto inicioTempo = system_clock::now();
 
                     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
                                     1,0,0,0,2,2,2,2,2,0,0,0,1,
@@ -355,8 +356,10 @@ int main()
                                 }
                             }
                         }
+                    auto tempoAtualTimer = system_clock::now();
+                    auto tempoDecorrido = duration_cast<seconds>(tempoAtualTimer - inicioTempo).count();
 
-                    cout<<"Bomba: "<<p1.bombaGasta<<" Movimento: "<<p1.movUtilizado<<" Pontuacao: "<<p1.pontuacao;
+                    cout<<"Bomba: "<<p1.bombaGasta<<" Movimento: "<<p1.movUtilizado<<" Pontuacao: "<<p1.pontuacao<<" Tempo: "<<tempoDecorrido;
                     } //fim do laco do jogo
 
 
