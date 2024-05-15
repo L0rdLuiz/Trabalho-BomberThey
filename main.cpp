@@ -100,6 +100,14 @@ void movInimigo (int m[13][13], int &ix, int &iy) {
         }
 }
 
+int soltarEspeciais () {
+    int especial = rand() % 1 + 1;
+        switch (especial) {
+            case 1:
+                return (7);
+        }//Aumentar os power ups aq
+}
+
 int main()
 {
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.movInimigo(m, ix1, iy1);
@@ -150,6 +158,12 @@ int main()
                     bool bombaColocada = false;
                     bomba b1;
                     player p1;
+                    inimigo i1;
+                    inimigo i2;
+                    inimigo i3;
+                    i1.iniVivo = true;
+                    i2.iniVivo = true;
+                    i3.iniVivo = true;
                     p1.vivo = true;
                     p1.bombaGasta = 0;
                     p1.movUtilizado = 0;
@@ -161,9 +175,6 @@ int main()
                     milliseconds intervaloBomba(3000);
                     auto inicioBomba = high_resolution_clock::now();
                     bool jogo = true; // loop do jogo para o menu depois
-                    bool inimigo1 = true; //Booleano do inimigo
-                    bool inimigo2 = true;
-                    bool inimigo3 = true;
                     bool Explosao = false;
                     auto inicioTempo = system_clock::now();
 
@@ -183,13 +194,18 @@ int main()
                     //Posicao inicial do personagem no consolewhile(menu != 5);
                     int x=1, y=1;
                     //Posicao inicial inimigo1
-                    int ix1=11, iy1=11;
+                    i1.ix = 11;
+                    i1.iy = 11;
                     //Posicao inicial inimigo2
-                    int ix2=11, iy2=1;
+                    i2.ix = 11;
+                    i2.iy = 1;
                     //Posicao inicial inimigo3
-                    int ix3=1, iy3=11;
+                    i3.ix = 1;
+                    i3.iy = 11;
                     //onde está a bomba
                     char tecla;
+
+                    //Pontuação de inimigo morto
 
                     while(jogo == true){
                         ///Posiciona a escrita no iicio do console
@@ -202,25 +218,25 @@ int main()
                                     if (p1.vivo == false) {
                                         jogo = false;
                                     }
-                                } else if((i==ix1 && j==iy1 && inimigo1 == true) || (i==ix2 && j==iy2 && inimigo2 == true) || (i==ix3 && j==iy3 && inimigo3 == true)) {
+                                } else if((i==i1.ix && j==i1.iy && i1.iniVivo == true) || (i==i2.ix && j==i2.iy && i2.iniVivo == true) || (i==i3.ix && j==i3.iy && i3.iniVivo == true)) {
                                     cout<<char(169); //inimigo
                                     //Randomificador de quantos movimentos ele irá fazer
                                     auto atual = high_resolution_clock::now();
                                     auto passou = duration_cast<milliseconds>(atual - inicio);
                                     if (passou >= intervalo) {
                                         //Inimigo 1
-                                        movInimigo(m, ix1, iy1);
-                                        if (ix1 == x && iy1 == y && inimigo1 == true) {
+                                        movInimigo(m, i1.ix, i1.iy);
+                                        if (i1.ix == x && i1.iy == y && i1.iniVivo == true) {
                                                 p1.vivo = false;
                                         }
                                         //Inimigo 2
-                                        movInimigo(m, ix2, iy2);
-                                        if (ix2 == x && iy2 == y && inimigo2 == true) {
+                                        movInimigo(m, i2.ix, i2.iy);
+                                        if (i2.ix == x && i2.iy == y && i2.iniVivo == true) {
                                                 p1.vivo = false;
                                         }
                                         //Inimigo 3
-                                        movInimigo(m, ix3, iy3);
-                                        if (ix3 == x && iy3 == y && inimigo3 == true) {
+                                        movInimigo(m, i3.ix, i3.iy);
+                                        if (i3.ix == x && i3.iy == y && i3.iniVivo == true) {
                                                 p1.vivo = false;
                                         }
                                         inicio = atual;
@@ -234,6 +250,7 @@ int main()
                                         case 4: cout<<char(79); break; // bomba Flick
                                         case 5: cout<<char(88); break; // area de explosão
                                         case 6: cout<<char(157); break; // explosao
+                                        case 7: cout<<char(187); break; // aumentar range da bomba
                                         //default: cout<<"-"; //erro
                                     } //fim switch
                                 }
@@ -294,7 +311,7 @@ int main()
                             }
                         }
 
-                        if (inimigo1 == false && inimigo2 == false && inimigo3 == false) {
+                        if (i1.iniVivo == false && i2.iniVivo == false && i3.iniVivo == false) {
                             jogo = false;
                             break;
                         }
@@ -321,41 +338,59 @@ int main()
                             for (int l = 0; l < 13; l++) {
                                 for (int c = 0; c < 13; c++) {
                                     if ((l==b1.bx+b1.distBomba && c == b1.by && m[l][c] != 1) || (l==b1.bx-b1.distBomba && c == b1.by && m[l][c] != 1)) { //para baixo e para cima explosão
-                                        m[l][c] = 0;
-                                        m[b1.bx][b1.by] = 0;
+                                        int randEspecial = rand() % 100 + 1;
+                                        if (randEspecial >= 90 && m[l][c] == 2) {
+                                            m[l][c] = soltarEspeciais();
+                                        }else {
+                                        }
                                         if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
                                             p1.vivo = false;
                                         }
-                                        else if ((l == ix1 && c == iy1) || (ix1 == x && iy1 == y)) {
-                                            inimigo1 = false;
+                                        else if ((l == i1.ix && c == i1.iy) || (i1.ix == x && i1.iy == y)) {
+                                            i1.iniVivo = false;
+                                            p1.pontuacao += 100;
                                         }
-                                        else if ((l == ix2 && c == iy2) || (ix2 == x && iy2 == y)) {
-                                            inimigo2 = false;
+                                        else if ((l == i2.ix && c == i2.iy) || (i2.ix == x && i2.iy == y)) {
+                                            i2.iniVivo = false;
+                                            p1.pontuacao += 100;
                                         }
-                                        else if ((l == ix3 && c == iy3) || (ix3 == x && iy3 == y)) {
-                                            inimigo3 = false;
+                                        else if ((l == i3.ix && c == i3.iy) || (i3.ix == x && i3.iy == y)) {
+                                            i3.iniVivo = false;
+                                            p1.pontuacao += 100;
                                         }
+                                        m[l][c] = 0;
+                                        m[b1.bx][b1.by] = 0;
                                         bombaColocada = false;
                                         b1.bombaAtual -= 1;
                                     } else if ((l == b1.bx && c == b1.by-b1.distBomba && m[l][c] != 1) || (l == b1.bx && c == b1.by+b1.distBomba && m[l][c] != 1)) { //para direita e para esquerda explosão
-                                        m[l][c] = 0;
-                                        m[b1.bx][b1.by] = 0;
+                                        int randEspecial = rand() % 100 + 1;
+                                        if (randEspecial >= 90 && m[l][c] == 2) {
+                                            m[l][c] = soltarEspeciais();
+                                        }
                                         if (l == x && c == y) {
                                             p1.vivo = false;
                                         }
-                                        else if (l == ix1 && c == iy1) {
-                                            inimigo1 = false;
+                                        else if (l == i1.ix && c == i1.iy) {
+                                            i1.iniVivo = false;
+                                            p1.pontuacao += 100;
                                         }
-                                        else if (l == ix2 && c == iy2) {
-                                            inimigo2 = false;
+                                        else if (l == i2.ix && c == i2.iy) {
+                                            i2.iniVivo = false;
+                                            p1.pontuacao += 100;
                                         }
-                                        else if (l == ix3 && c == iy3) {
-                                            inimigo3 = false;
+                                        else if (l == i3.ix && c == i3.iy) {
+                                            i3.iniVivo = false;
+                                            p1.pontuacao += 100;
                                         }
+                                        m[l][c] = 0;
+                                        m[b1.bx][b1.by] = 0;
+                                        bombaColocada = false;
+                                        b1.bombaAtual -= 1;
                                     }
                                 }
                             }
                         }
+
                     auto tempoAtualTimer = system_clock::now();
                     auto tempoDecorrido = duration_cast<seconds>(tempoAtualTimer - inicioTempo).count();
 
@@ -365,7 +400,7 @@ int main()
 
                     system("cls");
 
-                    if (inimigo1 == false && inimigo2 == false && inimigo3 == false) {
+                    if (i1.iniVivo == false && i2.iniVivo == false && i3.iniVivo == false) {
                         cout<<"Você matou todos os inimigos e ganhou o jogo, parabéns!"<<endl;
                         cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
                         cout<<"Professor: Alex Luciano"<<endl;
