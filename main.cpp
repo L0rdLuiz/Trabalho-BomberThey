@@ -100,6 +100,13 @@ void movInimigo (int m[13][13], int &ix, int &iy) {
         }
 }
 
+void verificarColisaoBomba(int l, int c, int x, int y, inimigo& i, player& p1) {
+    if ((l == i.ix && c == i.iy) || (i.ix == x && i.iy == y)) {
+        i.iniVivo = false;
+        p1.pontuacao += 100;
+    }
+}
+
 int soltarEspeciais () {
     int especial = rand() % 1 + 1;
         switch (especial) {
@@ -341,23 +348,13 @@ int main()
                                         int randEspecial = rand() % 100 + 1;
                                         if (randEspecial >= 90 && m[l][c] == 2) {
                                             m[l][c] = soltarEspeciais();
-                                        }else {
                                         }
                                         if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
                                             p1.vivo = false;
                                         }
-                                        else if ((l == i1.ix && c == i1.iy) || (i1.ix == x && i1.iy == y)) {
-                                            i1.iniVivo = false;
-                                            p1.pontuacao += 100;
-                                        }
-                                        else if ((l == i2.ix && c == i2.iy) || (i2.ix == x && i2.iy == y)) {
-                                            i2.iniVivo = false;
-                                            p1.pontuacao += 100;
-                                        }
-                                        else if ((l == i3.ix && c == i3.iy) || (i3.ix == x && i3.iy == y)) {
-                                            i3.iniVivo = false;
-                                            p1.pontuacao += 100;
-                                        }
+                                        verificarColisaoBomba(l, c, x, y, i1, p1);
+                                        verificarColisaoBomba(l, c, x, y, i2, p1);
+                                        verificarColisaoBomba(l, c, x, y, i3, p1);
                                         m[l][c] = 0;
                                         m[b1.bx][b1.by] = 0;
                                         bombaColocada = false;
@@ -370,18 +367,9 @@ int main()
                                         if (l == x && c == y) {
                                             p1.vivo = false;
                                         }
-                                        else if (l == i1.ix && c == i1.iy) {
-                                            i1.iniVivo = false;
-                                            p1.pontuacao += 100;
-                                        }
-                                        else if (l == i2.ix && c == i2.iy) {
-                                            i2.iniVivo = false;
-                                            p1.pontuacao += 100;
-                                        }
-                                        else if (l == i3.ix && c == i3.iy) {
-                                            i3.iniVivo = false;
-                                            p1.pontuacao += 100;
-                                        }
+                                        verificarColisaoBomba(l, c, x, y, i1, p1);
+                                        verificarColisaoBomba(l, c, x, y, i2, p1);
+                                        verificarColisaoBomba(l, c, x, y, i3, p1);
                                         m[l][c] = 0;
                                         m[b1.bx][b1.by] = 0;
                                         bombaColocada = false;
