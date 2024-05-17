@@ -42,8 +42,7 @@ bool colisaoBool(int p){
     }
 }
 
-void flick (int m[13][13], int bx, int by, bool Explosao) {
-    if (Explosao == false) {
+void flick (int m[13][13], int bx, int by) {
         for (int l = 0; l < 13; l++) {
             for (int c = 0; c < 13; c++) {
                 if ((l==bx+1 && c == by && m[l][c] == 0) || (l==bx-1 && c == by && m[l][c] == 0)) { //para baixo e para cima explosão
@@ -53,17 +52,6 @@ void flick (int m[13][13], int bx, int by, bool Explosao) {
                 }
             }
         }
-    }else {
-         for (int l = 0; l < 13; l++) {
-            for (int c = 0; c < 13; c++) {
-                if ((l==bx+1 && c == by && m[l][c] != 1) || (l==bx-1 && c == by && m[l][c] != 1)) { //para baixo e para cima explosão
-                    m[l][c] = 6;
-                } else if ((l == bx && c == by-1 && m[l][c] != 1) || (l == bx && c == by+1 && m[l][c] != 1)) { //para direita e para esquerda explosão
-                    m[l][c] = 6;
-                }
-            }
-        }
-    }
 }
 
 void movInimigo (int m[13][13], int &ix, int &iy) {
@@ -178,8 +166,8 @@ int main()
                     p1.pontuacao = 0;
                     milliseconds flick1Bomba1(1000);
                     milliseconds flick1Bomba2(2000);
-                    milliseconds flickExplosao(2500);
                     milliseconds intervaloBomba(3000);
+                    milliseconds flickExplosao(3500);
                     auto inicioBomba = high_resolution_clock::now();
                     bool jogo = true; // loop do jogo para o menu depois
                     bool Explosao = false;
@@ -328,23 +316,16 @@ int main()
                         auto passouBomba = duration_cast<milliseconds>(agora - inicioBomba);
                         if (bombaColocada && passouBomba >= flick1Bomba1) {
                             m[b1.bx][b1.by] = 3;
-                            flick(m,b1.bx,b1.by, Explosao);
+                            flick(m,b1.bx,b1.by);
                         }
                         if (bombaColocada && passouBomba >= flick1Bomba2) {
                             m[b1.bx][b1.by] = 4;
                         }
-                        if (bombaColocada && passouBomba >= flickExplosao) {
-                            m[b1.bx][b1.by] = 6;
-                            Explosao = true;
-                            flick(m,b1.bx,b1.by,Explosao);
-                            Explosao = false;
-                        }
-                        if (bombaColocada && passouBomba >= intervaloBomba) {
-                            // Explode a bomba
+                        if (bombaColocada && passouBomba >= intervaloBomba) {//Explosao
                             m[b1.bx][b1.by] = 3;
                             for (int l = 0; l < 13; l++) {
                                 for (int c = 0; c < 13; c++) {
-                                    if ((l==b1.bx+b1.distBomba && c == b1.by && m[l][c] != 1) || (l==b1.bx-b1.distBomba && c == b1.by && m[l][c] != 1)) { //para baixo e para cima explosão
+                                    if ((l==b1.bx+b1.distBomba && c == b1.by && m[l][c] != 1 && m[l][c] != 7) || (l==b1.bx-b1.distBomba && c == b1.by && m[l][c] != 1 && m[l][c] != 7)) { //para baixo e para cima explosão
                                         int randEspecial = rand() % 100 + 1;
                                         if (randEspecial >= 90 && m[l][c] == 2) {
                                             m[l][c] = soltarEspeciais();
@@ -355,11 +336,10 @@ int main()
                                         verificarColisaoBomba(l, c, x, y, i1, p1);
                                         verificarColisaoBomba(l, c, x, y, i2, p1);
                                         verificarColisaoBomba(l, c, x, y, i3, p1);
-                                        m[l][c] = 0;
-                                        m[b1.bx][b1.by] = 0;
-                                        bombaColocada = false;
+                                        m[l][c] = 6;
+                                        m[b1.bx][b1.by] = 6;
                                         b1.bombaAtual -= 1;
-                                    } else if ((l == b1.bx && c == b1.by-b1.distBomba && m[l][c] != 1) || (l == b1.bx && c == b1.by+b1.distBomba && m[l][c] != 1)) { //para direita e para esquerda explosão
+                                    } else if ((l == b1.bx && c == b1.by-b1.distBomba && m[l][c] != 1 && m[l][c] != 7) || (l == b1.bx && c == b1.by+b1.distBomba && m[l][c] != 1 && m[l][c] != 7)) { //para direita e para esquerda explosão
                                         int randEspecial = rand() % 100 + 1;
                                         if (randEspecial >= 90 && m[l][c] == 2) {
                                             m[l][c] = soltarEspeciais();
@@ -370,10 +350,39 @@ int main()
                                         verificarColisaoBomba(l, c, x, y, i1, p1);
                                         verificarColisaoBomba(l, c, x, y, i2, p1);
                                         verificarColisaoBomba(l, c, x, y, i3, p1);
+                                        m[l][c] = 6;
+                                        m[b1.bx][b1.by] = 6;
+
+                                        b1.bombaAtual -= 1;
+                                    }
+                                }
+                            }
+                        }
+                        //fogo da bomba
+                        if (bombaColocada && passouBomba >= flickExplosao) {
+                            m[b1.bx][b1.by] = 3;
+                            for (int l = 0; l < 13; l++) {
+                                for (int c = 0; c < 13; c++) {
+                                    if ((l==b1.bx+b1.distBomba && c == b1.by && m[l][c] != 1 && m[l][c] != 7) || (l==b1.bx-b1.distBomba && c == b1.by && m[l][c] != 1 && m[l][c] != 7)) { //para baixo e para cima explosão
+                                        if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                            p1.vivo = false;
+                                        }
+                                        verificarColisaoBomba(l, c, x, y, i1, p1);
+                                        verificarColisaoBomba(l, c, x, y, i2, p1);
+                                        verificarColisaoBomba(l, c, x, y, i3, p1);
+                                        bombaColocada = false;
                                         m[l][c] = 0;
                                         m[b1.bx][b1.by] = 0;
+                                    } else if ((l == b1.bx && c == b1.by-b1.distBomba && m[l][c] != 1 && m[l][c] != 7) || (l == b1.bx && c == b1.by+b1.distBomba && m[l][c] != 1 && m[l][c] != 7)) { //para direita e para esquerda explosão
+                                        if (l == x && c == y) {
+                                            p1.vivo = false;
+                                        }
+                                        verificarColisaoBomba(l, c, x, y, i1, p1);
+                                        verificarColisaoBomba(l, c, x, y, i2, p1);
+                                        verificarColisaoBomba(l, c, x, y, i3, p1);
                                         bombaColocada = false;
-                                        b1.bombaAtual -= 1;
+                                        m[l][c] = 0;
+                                        m[b1.bx][b1.by] = 0;
                                     }
                                 }
                             }
