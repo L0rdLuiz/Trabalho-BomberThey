@@ -170,7 +170,6 @@ int main()
                     milliseconds flickExplosao(3500);
                     auto inicioBomba = high_resolution_clock::now();
                     bool jogo = true; // loop do jogo para o menu depois
-                    bool Explosao = false;
                     auto inicioTempo = system_clock::now();
 
                     int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -336,7 +335,9 @@ int main()
                                         verificarColisaoBomba(l, c, x, y, i1, p1);
                                         verificarColisaoBomba(l, c, x, y, i2, p1);
                                         verificarColisaoBomba(l, c, x, y, i3, p1);
-                                        m[l][c] = 6;
+                                        if (m[l][c] != 7) {
+                                            m[l][c] = 6;
+                                        }
                                         m[b1.bx][b1.by] = 6;
                                         b1.bombaAtual -= 1;
                                     } else if ((l == b1.bx && c == b1.by-b1.distBomba && m[l][c] != 1 && m[l][c] != 7) || (l == b1.bx && c == b1.by+b1.distBomba && m[l][c] != 1 && m[l][c] != 7)) { //para direita e para esquerda explosão
@@ -350,7 +351,9 @@ int main()
                                         verificarColisaoBomba(l, c, x, y, i1, p1);
                                         verificarColisaoBomba(l, c, x, y, i2, p1);
                                         verificarColisaoBomba(l, c, x, y, i3, p1);
-                                        m[l][c] = 6;
+                                        if (m[l][c] != 7) {
+                                            m[l][c] = 6;
+                                        }
                                         m[b1.bx][b1.by] = 6;
 
                                         b1.bombaAtual -= 1;
