@@ -10,11 +10,14 @@
 using namespace std;
 
 struct player {
-    bool vivo;
+    int vivo = 1;
     bool vidaExtra;
     int pontuacao;
     int movUtilizado;
     int bombaGasta;
+    int maxVidaExtra = 2;
+    bool intangivel = false;
+    bool antiExplosao = false;
 };
 
 struct inimigo {
@@ -25,24 +28,28 @@ struct inimigo {
 };
 
 struct bomba {
-    int maxBomba = 1;
     int distBomba = 1;
-    bool bombaRelogio;
+    bool bombaRelogio = false;
     int bx;
     int by;
     int bombaAtual;
+    int maxDistBomba = 3;
 };
 
-bool colisaoBool(int p){
-    if (p != 0 && p!= 5 && p!=6 && p!=7) {
-        return false;
+bool colisaoBool(int p, player& p1){
+    if (p1.intangivel && p == 2) {
+        return true;
+    }
+    // Verifica se o valor de 'p' não é igual a nenhum dos valores listados
+    if (p != 0 && p != 5 && p != 6 && p != 7 && p != 8 && p != 9 && p != 10 && p != 11 && p != 12) {
+        return false; // Retorna false se 'p' não for igual a nenhum desses valores
     }
     else {
-        return true;
+        return true; // Retorna true se 'p' for igual a qualquer um desses valores
     }
 }
 
-void flick(int m[13][13], int bx, int by, bomba& b1) {
+void flick(int m[13][26], int bx, int by, bomba& b1) {
     bool pareCima = false, pareBaixo = false, pareEsq = false, pareDir = false;
 
     for (int dist = 1; dist <= b1.distBomba; dist++) {
@@ -72,9 +79,9 @@ void flick(int m[13][13], int bx, int by, bomba& b1) {
         if (!pareDir) {
             int l = bx;
             int c = by + dist;
-            if (c < 13 && m[l][c] == 1) {
+            if (c < 26 && m[l][c] == 1) {
                 pareDir = true;
-            } else if (c < 13 && m[l][c] == 0) {
+            } else if (c < 26 && m[l][c] == 0) {
                 m[l][c] = 5;
             }
         }
@@ -92,34 +99,34 @@ void flick(int m[13][13], int bx, int by, bomba& b1) {
     }
 }
 
-void movInimigo (int m[13][13], int &ix, int &iy) {
+void movInimigo (int m[13][26], int &ix, int &iy) {
     int movDir = rand()%4+1;
         switch (movDir) {
         //para cima
         case 1:
             ix--;
-            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7) {
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7 && m[ix][iy] !=8 && m[ix][iy] !=9 && m[ix][iy] !=10 && m[ix][iy] !=11) {
                 ix++;
             }
         break;
         //para baixo
         case 2:
             ix++;
-            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7) {
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7 && m[ix][iy] !=8 && m[ix][iy] !=9 && m[ix][iy] !=10 && m[ix][iy] !=11) {
                 ix--;
             }
         break;
         //para direita
         case 3:
             iy++;
-            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7) {
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7 && m[ix][iy] !=8 && m[ix][iy] !=9 && m[ix][iy] !=10 && m[ix][iy] !=11) {
                 iy--;
             }
         break;
         //para esquerda
         case 4:
             iy--;
-            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7) {
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7 && m[ix][iy] !=8 && m[ix][iy] !=9 && m[ix][iy] !=10 && m[ix][iy] !=11) {
                 iy++;
             }
         break;
@@ -134,11 +141,19 @@ void verificarColisaoBomba(int l, int c, int x, int y, inimigo& i, player& p1) {
 }
 
 int soltarEspeciais () {
-    int especial = rand() % 1 + 1;
+    int especial = rand() % 5 + 1;
         switch (especial) {
             case 1:
                 return (7);
-        }//Aumentar os power ups aq
+            case 2:
+                return (8);
+            case 3:
+                return (9);
+            case 4:
+                return (10);
+            case 5:
+                return (11);
+        }
 }
 
 int main()
@@ -162,6 +177,7 @@ int main()
     int menu;
     int dificuldade = 1;
     int repetir = 1;
+    int fase = 1;
 
     do{
         system("cls");
@@ -189,6 +205,7 @@ int main()
                     milliseconds intervalo(500);
                     auto inicio = high_resolution_clock::now();
                     bool bombaColocada = false;
+                    bool ativaBomba = false;
                     bomba b1;
                     player p1;
                     inimigo i1;
@@ -197,7 +214,6 @@ int main()
                     i1.iniVivo = true;
                     i2.iniVivo = true;
                     i3.iniVivo = true;
-                    p1.vivo = true;
                     p1.bombaGasta = 0;
                     p1.movUtilizado = 0;
                     p1.vidaExtra = 0;
@@ -210,30 +226,30 @@ int main()
                     bool jogo = true; // loop do jogo para o menu depois
                     auto inicioTempo = system_clock::now();
 
-                    int m[13][13]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,
-                                    1,0,0,0,2,2,2,2,2,0,0,0,1,
-                                    1,0,1,0,1,2,1,0,1,0,1,0,1,
-                                    1,0,0,0,2,2,2,2,2,0,0,0,1,
-                                    1,0,1,2,1,0,1,2,1,0,1,2,1,
-                                    1,2,2,2,2,2,2,2,2,2,2,2,1,
-                                    1,2,1,0,1,2,1,0,1,2,1,0,1,
-                                    1,2,2,2,2,2,2,2,2,2,2,2,1,
-                                    1,2,1,0,1,2,1,0,1,2,1,0,1,
-                                    1,0,0,0,2,2,2,2,2,0,0,0,1,
-                                    1,0,1,0,1,0,1,0,1,0,1,0,1,
-                                    1,0,0,0,2,2,2,2,2,0,0,0,1,
-                                    1,1,1,1,1,1,1,1,1,1,1,1,1};
+                    int m[13][26]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                                    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+                                    1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,
+                                    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+                                    1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,
+                                    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+                                    1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,
+                                    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+                                    1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,
+                                    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+                                    1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,
+                                    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,1,
+                                    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,};
                     //Posicao inicial do personagem no consolewhile(menu != 5);
                     int x=1, y=1;
                     //Posicao inicial inimigo1
                     i1.ix = 11;
-                    i1.iy = 11;
+                    i1.iy = 24;
                     //Posicao inicial inimigo2
                     i2.ix = 11;
                     i2.iy = 1;
                     //Posicao inicial inimigo3
                     i3.ix = 1;
-                    i3.iy = 11;
+                    i3.iy = 24;
                     //onde está a bomba
                     char tecla;
 
@@ -244,10 +260,10 @@ int main()
                         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
                         ///Imprime o jogo: mapa e personagem.
                         for(int i=0;i<13;i++){
-                            for(int j=0;j<13;j++){
+                            for(int j=0;j<26;j++){
                                 if(i==x && j==y){
                                     cout<<char(36); //personagem
-                                    if (p1.vivo == false) {
+                                    if (p1.vivo == 0) {
                                         jogo = false;
                                     }
                                 } else if((i==i1.ix && j==i1.iy && i1.iniVivo == true) || (i==i2.ix && j==i2.iy && i2.iniVivo == true) || (i==i3.ix && j==i3.iy && i3.iniVivo == true)) {
@@ -259,17 +275,17 @@ int main()
                                         //Inimigo 1
                                         movInimigo(m, i1.ix, i1.iy);
                                         if (i1.ix == x && i1.iy == y && i1.iniVivo == true) {
-                                                p1.vivo = false;
+                                                p1.vivo = p1.vivo - 1;
                                         }
                                         //Inimigo 2
                                         movInimigo(m, i2.ix, i2.iy);
                                         if (i2.ix == x && i2.iy == y && i2.iniVivo == true) {
-                                                p1.vivo = false;
+                                                p1.vivo = p1.vivo - 1;
                                         }
                                         //Inimigo 3
                                         movInimigo(m, i3.ix, i3.iy);
                                         if (i3.ix == x && i3.iy == y && i3.iniVivo == true) {
-                                                p1.vivo = false;
+                                                p1.vivo = p1.vivo - 1;
                                         }
                                         inicio = atual;
                                     }
@@ -282,7 +298,13 @@ int main()
                                         case 4: cout<<char(79); break; // bomba Flick
                                         case 5: cout<<char(88); break; // area de explosão
                                         case 6: cout<<char(157); break; // explosao
+                                        // Poderes
                                         case 7: cout<<char(43); break; // aumentar range da bomba
+                                        case 8: cout<<char(253); break; // vida extra
+                                        case 9: cout<<char(73); break; // passar pelas paredes quebraveis
+                                        case 10: cout<<char(153); break; // sobreviver a bomba
+                                        case 11: cout<<char(207); break; // bomba relogio
+                                        case 12: cout<<char(186); break; // portal
                                         //default: cout<<"-"; //erro
                                     } //fim switch
                                 }
@@ -297,7 +319,7 @@ int main()
                                 case 72: case 'w': ///cima
                                     x--;
                                     p1.movUtilizado += 1;
-                                    if (colisaoBool(m[x][y])== false) {
+                                    if (colisaoBool(m[x][y], p1)== false) {
                                         x++;
                                         p1.movUtilizado -= 1;
                                     };
@@ -305,7 +327,7 @@ int main()
                                 case 80: case 's': ///baixo
                                     x++;
                                     p1.movUtilizado += 1;
-                                    if (colisaoBool(m[x][y])== false) {
+                                    if (colisaoBool(m[x][y], p1)== false) {
                                         x--;
                                         p1.movUtilizado -= 1;
                                     };
@@ -313,7 +335,7 @@ int main()
                                 case 75:case 'a': ///esquerda
                                     y--;
                                     p1.movUtilizado += 1;
-                                    if (colisaoBool(m[x][y])== false) {
+                                    if (colisaoBool(m[x][y], p1)== false) {
                                         y++;
                                         p1.movUtilizado -= 1;
                                     };
@@ -321,7 +343,7 @@ int main()
                                 case 77: case 'd': ///direita
                                     y++;
                                     p1.movUtilizado += 1;
-                                    if (colisaoBool(m[x][y])== false) {
+                                    if (colisaoBool(m[x][y], p1)== false) {
                                         y--;
                                         p1.movUtilizado -= 1;
                                     };
@@ -329,167 +351,321 @@ int main()
                                 case 'e': ///bomba
                                     if (!bombaColocada) {
                                         m[x][y] = 3; // Coloca a bomba no mapa
-
-                                        b1.bombaRelogio = false;
                                         b1.bx = x;
                                         b1.by = y;
                                         b1.bombaAtual = 1;
-                                        inicioBomba = high_resolution_clock::now(); // Armazena o tempo atual
-                                        bombaColocada = true;
+                                        if (b1.bombaRelogio == false) {
+                                            inicioBomba = high_resolution_clock::now();
+                                            bombaColocada = true;
+                                        }
                                         p1.bombaGasta += 1;
                                         b1.distBomba;
                                     }
-                                    break;
+                                break;
+                                case 'q': ///bomba relogio
+                                    if (b1.bombaRelogio == true) {
+                                        inicioBomba = high_resolution_clock::now();
+                                        ativaBomba = true;
+                                        bombaColocada = true;
+                                    }
                             }
                         }
 
-                        if (i1.iniVivo == false && i2.iniVivo == false && i3.iniVivo == false) {
-                            jogo = false;
+                        if ((b1.bombaRelogio == false) || (b1.bombaRelogio == true && ativaBomba == true)) {
+                            auto agora = high_resolution_clock::now();
+                            auto passouBomba = duration_cast<milliseconds>(agora - inicioBomba);
+                            if (bombaColocada && passouBomba >= flick1Bomba1) {
+                                m[b1.bx][b1.by] = 3;
+                                flick(m,b1.bx,b1.by, b1);
+                            }
+                            if (bombaColocada && passouBomba >= flick1Bomba2) {
+                                m[b1.bx][b1.by] = 4;
+                            }
+                            if (bombaColocada && passouBomba >= intervaloBomba) { // Explosão
+                                m[b1.bx][b1.by] = 3;
+                                bool pareExCima = false, pareExBaixo = false, pareExDir = false, pareExEsq = false;
+                                for(int l = 0; l < 13; l++) {
+                                    for (int c = 0; c < 26; c++){
+                                        for (int dist = 1; dist <= b1.distBomba; dist++) {
+                                            // Para Baixo
+                                            if (pareExBaixo == false) {
+                                                if (l == b1.bx+dist && c == b1.by && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                    int randEspecial = rand() % 100 + 1;
+                                                    if (randEspecial >= 50 && m[l][c] == 2) {
+                                                        m[l][c] = soltarEspeciais();
+                                                    }
+                                                    if(p1.antiExplosao == false){
+                                                        if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                                            p1.vivo = p1.vivo - 1;
+                                                            x = 1;
+                                                            y = 1;
+                                                            if (p1.vivo == 0) {
+                                                                jogo = false;
+                                                            }
+                                                        }
+                                                    }
+                                                    verificarColisaoBomba(l, c, x, y, i1, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i2, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i3, p1);
+                                                    if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        m[l][c] = 6;
+                                                    }
+                                                    m[b1.bx][b1.by] = 6;
+                                                    b1.bombaAtual -= 1;
+                                                } else if(l==b1.bx+dist && c == b1.by && m[l][c] == 1) {
+                                                    pareExBaixo = true;
+                                                }
+                                            }
+                                            // Para Cima
+                                            if (pareExCima == false) {
+                                                if (l == b1.bx-dist && c == b1.by && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                    int randEspecial = rand() % 100 + 1;
+                                                    if (randEspecial >= 20 && m[l][c] == 2) {
+                                                        m[l][c] = soltarEspeciais();
+                                                    }
+                                                    if(p1.antiExplosao == false){
+                                                        if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                                            p1.vivo = p1.vivo - 1;
+                                                            x = 1;
+                                                            y = 1;
+                                                            if (p1.vivo == 0) {
+                                                                jogo = false;
+                                                            }
+                                                        }
+                                                    }
+                                                    verificarColisaoBomba(l, c, x, y, i1, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i2, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i3, p1);
+                                                    if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        m[l][c] = 6;
+                                                    }
+                                                    m[b1.bx][b1.by] = 6;
+                                                    b1.bombaAtual -= 1;
+                                                } else if(l==b1.bx-dist && c == b1.by && m[l][c] == 1) {
+                                                    pareExCima = true;
+                                                }
+                                            }
+                                            // Para Direita
+                                            if (pareExDir == false) {
+                                                if (l==b1.bx && c == b1.by+dist && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                    int randEspecial = rand() % 100 + 1;
+                                                    if (randEspecial >= 50 && m[l][c] == 2) {
+                                                        m[l][c] = soltarEspeciais();
+                                                    }
+                                                    if(p1.antiExplosao == false){
+                                                        if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                                            p1.vivo = p1.vivo - 1;
+                                                            x = 1;
+                                                            y = 1;
+                                                            if (p1.vivo == 0) {
+                                                                jogo = false;
+                                                            }
+                                                        }
+                                                    }
+                                                    verificarColisaoBomba(l, c, x, y, i1, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i2, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i3, p1);
+                                                    if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        m[l][c] = 6;
+                                                    }
+                                                    m[b1.bx][b1.by] = 6;
+                                                    b1.bombaAtual -= 1;
+                                                } else if(l==b1.bx && c == b1.by+dist && m[l][c] == 1) {
+                                                    pareExDir = true;
+                                                }
+                                            }
+                                            // Para Esquerda
+                                            if (pareExEsq == false) {
+                                                if (l==b1.bx && c == b1.by-dist && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                    int randEspecial = rand() % 100 + 1;
+                                                    if (randEspecial >= 50 && m[l][c] == 2) {
+                                                        m[l][c] = soltarEspeciais();
+                                                    }
+                                                    if(p1.antiExplosao == false){
+                                                        if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                                            p1.vivo = p1.vivo - 1;
+                                                            x = 1;
+                                                            y = 1;
+                                                            if (p1.vivo == 0) {
+                                                                jogo = false;
+                                                            }
+                                                        }
+                                                    }
+                                                    verificarColisaoBomba(l, c, x, y, i1, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i2, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i3, p1);
+                                                    if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        m[l][c] = 6;
+                                                    }
+                                                    m[b1.bx][b1.by] = 6;
+                                                    b1.bombaAtual -= 1;
+                                                } else if(l==b1.bx && c == b1.by-dist && m[l][c] == 1) {
+                                                    pareExEsq = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                // Fogo
+                                if (bombaColocada && passouBomba >= flickExplosao) {
+                                bool pareFogoCima = false, pareFogoBaixo = false, pareFogoDir = false, pareFogoEsq = false;
+                                    for(int l = 0; l < 13; l++) {
+                                        for (int c = 0; c < 26; c++){
+                                            for (int distFogo = 1; distFogo <= b1.distBomba; distFogo++) {
+                                                // Para Baixo Fogo
+                                                if (pareFogoBaixo == false) {
+                                                    if (l==b1.bx+distFogo && c == b1.by && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        if(p1.antiExplosao == false){
+                                                            if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                                                p1.vivo = p1.vivo - 1;
+                                                                x = 1;
+                                                                y = 1;
+                                                                if (p1.vivo == 0) {
+                                                                    jogo = false;
+                                                                }
+                                                            }
+                                                        }
+                                                        verificarColisaoBomba(l, c, x, y, i1, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i2, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i3, p1);
+                                                        bombaColocada = false;
+                                                        m[l][c] = 0;
+                                                        m[b1.bx][b1.by] = 0;
+                                                    } else if(l==b1.bx+distFogo && c == b1.by && m[l][c] == 1) {
+                                                        pareFogoBaixo = true;
+                                                    }
+                                                }
+                                                // Para Cima Fogo
+                                                if (pareFogoCima == false) {
+                                                    if (l==b1.bx-distFogo && c == b1.by && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        if(p1.antiExplosao == false){
+                                                            if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                                                p1.vivo = p1.vivo - 1;
+                                                                x = 1;
+                                                                y = 1;
+                                                                if (p1.vivo == 0) {
+                                                                    jogo = false;
+                                                                }
+                                                            }
+                                                        }
+                                                        verificarColisaoBomba(l, c, x, y, i1, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i2, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i3, p1);
+                                                        bombaColocada = false;
+                                                        m[l][c] = 0;
+                                                        m[b1.bx][b1.by] = 0;
+                                                    } else if(l==b1.bx-distFogo && c == b1.by && m[l][c] == 1) {
+                                                        pareFogoCima = true;
+                                                    }
+                                                }
+                                                // Para Direita Fogo
+                                                if (pareFogoDir == false) {
+                                                    if (l==b1.bx && c == b1.by+distFogo && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        if(p1.antiExplosao == false){
+                                                            if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                                                p1.vivo = p1.vivo - 1;
+                                                                x = 1;
+                                                                y = 1;
+                                                                if (p1.vivo == 0) {
+                                                                    jogo = false;
+                                                                }
+                                                            }
+                                                        }
+                                                        verificarColisaoBomba(l, c, x, y, i1, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i2, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i3, p1);
+                                                        bombaColocada = false;
+                                                        m[l][c] = 0;
+                                                        m[b1.bx][b1.by] = 0;
+                                                    } else if(l==b1.bx && c == b1.by+distFogo && m[l][c] == 1) {
+                                                        pareFogoDir = true;
+                                                    }
+                                                }
+                                                // Para Esquerda Fogo
+                                                if (pareFogoEsq == false) {
+                                                    if (l==b1.bx && c == b1.by-distFogo && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        if(p1.antiExplosao == false){
+                                                            if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
+                                                                p1.vivo = p1.vivo - 1;
+                                                                x = 1;
+                                                                y = 1;
+                                                                if (p1.vivo == 0) {
+                                                                    jogo = false;
+                                                                }
+                                                            }
+                                                        }
+                                                        verificarColisaoBomba(l, c, x, y, i1, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i2, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i3, p1);
+                                                        bombaColocada = false;
+                                                        m[l][c] = 0;
+                                                        m[b1.bx][b1.by] = 0;
+                                                    } else if(l==b1.bx && c == b1.by-distFogo && m[l][c] == 1) {
+                                                        pareFogoEsq = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    bombaColocada = false;
+                                }
+                            }
+                        }
+
+                        //Power up de range de bomba
+                        if (m[x][y] == 7 && b1.distBomba != b1.maxDistBomba) {
+                            b1.distBomba = b1.distBomba + 1;
+                            m[x][y] = 0;
+                        } else if (m[x][y] == 7 && b1.distBomba == b1.maxDistBomba) {
+                            b1.distBomba = 3;
+                            m[x][y] = 0;
+                            p1.pontuacao = p1.pontuacao + 50;
+                        }
+                        //Power Up de Vida Extra
+                        if (m[x][y] == 8 && p1.vivo != p1.maxVidaExtra) {
+                            p1.vivo = p1.vivo + 1;
+                            m[x][y] = 0;
+                        } else if (m[x][y] == 8 && p1.vivo == p1.maxVidaExtra) {
+                            p1.vivo = 2;
+                            m[x][y] = 0;
+                            p1.pontuacao = p1.pontuacao + 50;
+                        }
+                        //Power Up passar pela parede quebravel
+                        if (m[x][y] == 9 && p1.intangivel == false) {
+                            p1.intangivel = true;
+                            m[x][y] = 0;
+                        } else if (m[x][y] == 9 && p1.intangivel == true) {
+                            m[x][y] = 0;
+                            p1.pontuacao = p1.pontuacao + 50;
+                        }
+                        //Power Up sobrevive para bomba
+                        if (m[x][y] == 10 && p1.antiExplosao == false) {
+                            p1.antiExplosao = true;
+                            m[x][y] = 0;
+                        } else if (m[x][y] == 10 && p1.antiExplosao == true) {
+                            m[x][y] = 0;
+                            p1.pontuacao = p1.pontuacao + 50;
+                        }
+                        //Power Up Bomba Relogio
+                        if (m[x][y] == 11 && b1.bombaRelogio == false) {
+                            b1.bombaRelogio = true;
+                            m[x][y] = 0;
+                        } else if (m[x][y] == 11 && b1.bombaRelogio == true) {
+                            m[x][y] = 0;
+                            p1.pontuacao = p1.pontuacao + 50;
+                        }
+
+                        //Portal
+                        if (m[x][y] == 12 && fase != 3) {
+                            x = 1;
+                            y = 1;
+                            fase += 1;
                             break;
                         }
 
-
-
-                        // Verifica se a bomba explodiu após 3 segundos
-                        auto agora = high_resolution_clock::now();
-                        auto passouBomba = duration_cast<milliseconds>(agora - inicioBomba);
-                        if (bombaColocada && passouBomba >= flick1Bomba1) {
-                            m[b1.bx][b1.by] = 3;
-                            flick(m,b1.bx,b1.by, b1);
-                        }
-                        if (bombaColocada && passouBomba >= flick1Bomba2) {
-                            m[b1.bx][b1.by] = 4;
-                        }
-                        if (bombaColocada && passouBomba >= intervaloBomba) {//Explosao
-                            m[b1.bx][b1.by] = 3;
-                            bool pareExCima = false, pareExBaixo = false, pareExDir = false, pareExEsq = false;
-                            for (int l = 0; l < 13; l++) {
-                                for (int c = 0; c < 13; c++) {
-                                    for (int dist = 1; dist <= b1.distBomba; dist++) {
-                                        //Para Baixo
-                                        if (!pareExBaixo) {
-                                            if (m[l][c] == 1 || m[l][c] == 7) {
-                                                pareExBaixo = true;
-                                            } else if (l==b1.bx+dist && c == b1.by && m[l][c] != 1 && m[l][c] != 7) {
-                                                int randEspecial = rand() % 100 + 1;
-                                                if (randEspecial >= 90 && m[l][c] == 2) {
-                                                    m[l][c] = soltarEspeciais();
-                                                }
-                                                if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
-                                                    p1.vivo = false;
-                                                }
-                                                verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                if (m[l][c] != 7) {
-                                                    m[l][c] = 6;
-                                                }
-                                                m[b1.bx][b1.by] = 6;
-                                                b1.bombaAtual -= 1;
-                                            }
-                                        }
-                                        //Para Cima
-                                        if(!pareExCima) {
-                                            if (m[l][c] == 1 || m[l][c] == 7) {
-                                                pareExCima = true;
-                                            } else if (l==b1.bx-dist && c == b1.by && m[l][c] != 1 && m[l][c] != 7) {
-                                                int randEspecial = rand() % 100 + 1;
-                                                if (randEspecial >= 90 && m[l][c] == 2) {
-                                                    m[l][c] = soltarEspeciais();
-                                                }
-                                                if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
-                                                    p1.vivo = false;
-                                                }
-                                                verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                if (m[l][c] != 7) {
-                                                    m[l][c] = 6;
-                                                }
-                                                m[b1.bx][b1.by] = 6;
-                                                b1.bombaAtual -= 1;
-                                            }
-                                        }
-                                        //Para Direita
-                                        if(!pareExDir) {
-                                            if (m[l][c] == 1 || m[l][c] == 7) {
-                                                pareExDir = true;
-                                            } else if (l==b1.bx && c == b1.by+dist && m[l][c] != 1 && m[l][c] != 7) {
-                                                int randEspecial = rand() % 100 + 1;
-                                                if (randEspecial >= 90 && m[l][c] == 2) {
-                                                    m[l][c] = soltarEspeciais();
-                                                }
-                                                if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
-                                                    p1.vivo = false;
-                                                }
-                                                verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                if (m[l][c] != 7) {
-                                                    m[l][c] = 6;
-                                                }
-                                                m[b1.bx][b1.by] = 6;
-                                                b1.bombaAtual -= 1;
-                                            }
-                                        }
-                                        //Para Esq
-                                        if(!pareExEsq) {
-                                            if (m[l][c] == 1 || m[l][c] == 7) {
-                                                pareExEsq = true;
-                                            } else if(l==b1.bx && c == b1.by-dist && m[l][c] != 1 && m[l][c] != 7) {
-                                                int randEspecial = rand() % 100 + 1;
-                                                if (randEspecial >= 90 && m[l][c] == 2) {
-                                                    m[l][c] = soltarEspeciais();
-                                                }
-                                                if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
-                                                    p1.vivo = false;
-                                                }
-                                                verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                if (m[l][c] != 7) {
-                                                    m[l][c] = 6;
-                                                }
-                                                m[b1.bx][b1.by] = 6;
-                                                b1.bombaAtual -= 1;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        //fogo da bomba
-                        if (bombaColocada && passouBomba >= flickExplosao) {
-                            m[b1.bx][b1.by] = 3;
-                            for (int l = 0; l < 13; l++) {
-                                for (int c = 0; c < 13; c++) {
-                                    if ((l==b1.bx+b1.distBomba && c == b1.by && m[l][c] != 1 && m[l][c] != 7) || (l==b1.bx-b1.distBomba && c == b1.by && m[l][c] != 1 && m[l][c] != 7)) { //para baixo e para cima explosão
-                                        if ((l == x && c == y) || (b1.bx == x && b1.by == y)) {
-                                            p1.vivo = false;
-                                        }
-                                        verificarColisaoBomba(l, c, x, y, i1, p1);
-                                        verificarColisaoBomba(l, c, x, y, i2, p1);
-                                        verificarColisaoBomba(l, c, x, y, i3, p1);
-                                        bombaColocada = false;
-                                        m[l][c] = 0;
-                                        m[b1.bx][b1.by] = 0;
-                                    } else if ((l == b1.bx && c == b1.by-b1.distBomba && m[l][c] != 1 && m[l][c] != 7) || (l == b1.bx && c == b1.by+b1.distBomba && m[l][c] != 1 && m[l][c] != 7)) { //para direita e para esquerda explosão
-                                        if (l == x && c == y) {
-                                            p1.vivo = false;
-                                        }
-                                        verificarColisaoBomba(l, c, x, y, i1, p1);
-                                        verificarColisaoBomba(l, c, x, y, i2, p1);
-                                        verificarColisaoBomba(l, c, x, y, i3, p1);
-                                        bombaColocada = false;
-                                        m[l][c] = 0;
-                                        m[b1.bx][b1.by] = 0;
-                                    }
-                                }
-                            }
-                        }
-                        if (m[x][y] == 7) {
-                            b1.distBomba = b1.distBomba + 1;
-                            m[x][y] = 0;
+                        //Sumir Portal
+                        if (fase == 3) {
+                            m[11][24] =0;
                         }
 
                     auto tempoAtualTimer = system_clock::now();
@@ -497,27 +673,34 @@ int main()
 
                     cout<<"Bomba: "<<p1.bombaGasta<<" Movimento: "<<p1.movUtilizado<<" Pontuacao: "<<p1.pontuacao<<" Tempo: "<<tempoDecorrido;
                     //teste
-                    cout<<"Distancia da bomba: "<<b1.distBomba;
+                    cout<<endl<<"Distancia da bomba: "<<b1.distBomba<<" Vida: "<<p1.vivo<<" Intagibilidade: "<< p1.intangivel<<" Contra-Explosao: "<< p1.antiExplosao<< " Bomba-Relogio: "<< b1.bombaRelogio;
+                    cout<<endl<<"Voce esta na fase : "<<fase;
                     } //fim do laco do jogo
 
 
                     system("cls");
 
                     if (i1.iniVivo == false && i2.iniVivo == false && i3.iniVivo == false) {
-                        cout<<"Você matou todos os inimigos e ganhou o jogo, parabéns!"<<endl;
+                        cout<<"Voce matou todos os inimigos e ganhou o jogo, parabéns!"<<endl;
                         cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
                         cout<<"Professor: Alex Luciano"<<endl;
                         cout<<"Quer jogar novamente?"<<endl;
                         cout<<"Digite 1 para jogar de novo ou 0 para sair"<<endl;
                         cin>>repetir;
+                        if (repetir == 1) {
+                            fase =1;
+                        }
                     }
-                    if (p1.vivo == false) {
-                        cout<<"Você perdeu o jogo"<<endl;
+                    if (p1.vivo == 0) {
+                        cout<<"Voce perdeu o jogo"<<endl;
                         cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
                         cout<<"Professor: Alex Luciano"<<endl;
                         cout<<"Quer jogar novamente?"<<endl;
                         cout<<"Digite 1 para jogar de novo ou 0 para sair"<<endl;
                         cin>>repetir;
+                        if (repetir == 1) {
+                            fase =1;
+                        }
                     }
                 }while (repetir == 1);
                 break;
