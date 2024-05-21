@@ -6,6 +6,10 @@
 #include <time.h>
 #include <chrono>
 #include <thread>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <algorithm>
 
 using namespace std;
 using namespace chrono;
@@ -215,6 +219,12 @@ int soltarEspeciais () {
         }
 }
 
+void pontosMorte(inimigo& iniEsp,player& p1) {
+    if (iniEsp.iniVivo == false) {
+        p1.pontuacao += 100;
+    }
+}
+
 void pontosMorte(inimigo& i, player& p1, bool& deuPonto) {
     if (i.iniVivo == false && deuPonto == false) {
         p1.pontuacao += 50;
@@ -243,6 +253,75 @@ void pontosPorMovimento(player& p1){
     }
     if (p1.movUtilizado > 400) {
         p1.pontuacao -= 25;
+    }
+}
+
+int randEspeciais (int dificuldade) {
+    switch (dificuldade) {
+        case 1:
+            return(60);
+        case 2:
+            return(70);
+        case 3:
+            return(75);
+    }
+}
+
+// Função para atualizar e mostrar o ranking
+void atualizarMostrarRanking(const string& nome_atual, int pontuacao_atual) {
+    vector<int> pontuacao_do_ranking(10, 0);
+    vector<string> nome_no_ranking(10, "");
+
+    ifstream ranking_in("pontuacao_e_nome.txt");
+    if (!ranking_in) {
+        cerr << "Arquivo de ranking não encontrado. Criando um novo." << endl;
+        ofstream ranking_out("pontuacao_e_nome.txt");
+        for (int i = 0; i < 10; i++) {
+            ranking_out << 0 << " " << "empty" << endl;
+        }
+        ranking_out.close();
+        ranking_in.open("pontuacao_e_nome.txt");
+        if (!ranking_in) {
+            cerr << "Erro ao criar o arquivo de ranking." << endl;
+            return;
+        }
+    }
+
+    for (int i = 0; i < 10; i++) {
+        ranking_in >> pontuacao_do_ranking[i] >> nome_no_ranking[i];
+    }
+    ranking_in.close();
+
+    pontuacao_do_ranking.push_back(pontuacao_atual);
+    nome_no_ranking.push_back(nome_atual);
+
+    vector<pair<int, string>> ranking;
+    for (int i = 0; i < 11; i++) {
+        ranking.push_back(make_pair(pontuacao_do_ranking[i], nome_no_ranking[i]));
+    }
+
+    sort(ranking.rbegin(), ranking.rend());
+    ranking.resize(10);
+
+    for (int i = 0; i < 10; i++) {
+        pontuacao_do_ranking[i] = ranking[i].first;
+        nome_no_ranking[i] = ranking[i].second;
+    }
+
+    ofstream ranking_out("pontuacao_e_nome.txt");
+    if (!ranking_out) {
+        cerr << "Erro ao abrir o arquivo de ranking para escrita." << endl;
+        return;
+    }
+
+    for (int i = 0; i < 10; i++) {
+        ranking_out << pontuacao_do_ranking[i] << " " << nome_no_ranking[i] << endl;
+    }
+    ranking_out.close();
+
+    cout << "Ranking atualizado:" << endl;
+    for (int i = 0; i < 10; i++) {
+        cout << i + 1 << ". " << nome_no_ranking[i] << " - " << pontuacao_do_ranking[i] << endl;
     }
 }
 
@@ -300,7 +379,7 @@ int main()
                     PlaySound (0,0,0);
                     PlaySound (TEXT("musica jogo.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
                     srand (time(NULL));
-                    milliseconds intervalo(250);
+                    milliseconds intervalo(400);
                     auto inicio = high_resolution_clock::now();
                     bool bombaColocada = false;
                     bool ativaBomba = false;
@@ -537,6 +616,7 @@ int main()
                                         ativaBomba = true;
                                         bombaColocada = true;
                                     }
+                                    break;
                                 case 79: case 'm': ///parar a musica
                                         PlaySound (0,0,0);
                                     break;
@@ -566,7 +646,7 @@ int main()
                                             if (pareExBaixo == false) {
                                                 if (l == b1.bx+dist && c == b1.by && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
                                                     int randEspecial = rand() % 100 + 1;
-                                                    if (randEspecial >= 50 && m[l][c] == 2) {
+                                                    if (randEspecial >= randEspeciais(dificuldade) && m[l][c] == 2) {
                                                         m[l][c] = soltarEspeciais();
                                                     }
                                                     if(p1.antiExplosao == false){
@@ -601,7 +681,7 @@ int main()
                                             if (pareExCima == false) {
                                                 if (l == b1.bx-dist && c == b1.by && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
                                                     int randEspecial = rand() % 100 + 1;
-                                                    if (randEspecial >= 20 && m[l][c] == 2) {
+                                                    if (randEspecial >= randEspeciais(dificuldade) && m[l][c] == 2) {
                                                         m[l][c] = soltarEspeciais();
                                                     }
                                                     if(p1.antiExplosao == false){
@@ -636,7 +716,7 @@ int main()
                                             if (pareExDir == false) {
                                                 if (l==b1.bx && c == b1.by+dist && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
                                                     int randEspecial = rand() % 100 + 1;
-                                                    if (randEspecial >= 50 && m[l][c] == 2) {
+                                                    if (randEspecial >= randEspeciais(dificuldade) && m[l][c] == 2) {
                                                         m[l][c] = soltarEspeciais();
                                                     }
                                                     if(p1.antiExplosao == false){
@@ -671,7 +751,7 @@ int main()
                                             if (pareExEsq == false) {
                                                 if (l==b1.bx && c == b1.by-dist && m[l][c] != 1 && m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
                                                     int randEspecial = rand() % 100 + 1;
-                                                    if (randEspecial >= 50 && m[l][c] == 2) {
+                                                    if (randEspecial >= randEspeciais(dificuldade) && m[l][c] == 2) {
                                                         m[l][c] = soltarEspeciais();
                                                     }
                                                     if(p1.antiExplosao == false){
@@ -889,6 +969,7 @@ int main()
                         pontosMorte(i3,p1, deuPonto3);
                         pontosMorte(i4,p1, deuPonto4);
                         pontosMorte(i5,p1, deuPonto5);
+                        pontosMorte (iniEsp,p1);
 
                         //Ganhar
                         if(fase == 3 && iniEsp.iniVivo == false) {
@@ -910,16 +991,24 @@ int main()
 
                     system("cls");
                     if (fase == 3 && iniEsp.iniVivo == false) {
-                        cout<<"Voce Ganhou o jogo e matou o Boss!"<<endl;
-                        cout<<"Você fez os seguintes pontos: "<<endl;
-                        cout<<"Bomba Gasta: "<<p1.bombaGasta<<" Movimento Gasto: "<<p1.movUtilizado<<" Pontuacao Feita: "<<p1.pontuacao;
-                        cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
-                        cout<<"Professor: Alex Luciano"<<endl;
-                        cout<<"Quer jogar novamente?"<<endl;
-                        cout<<"Digite 1 para jogar de novo ou 0 para sair"<<endl;
-                        cin>>repetir;
+                        cout << "Voce Ganhou o jogo e matou o Boss!" << endl;
+                        cout << "Você fez os seguintes pontos: " << endl;
+                        cout << "Bomba Gasta: " << p1.bombaGasta << " Movimento Gasto: " << p1.movUtilizado << " Pontuacao Feita: " << p1.pontuacao << endl;
+                        cout << "Jogo feito por:" << endl << "Luiz Antonio Haenisch" << endl << "Daniel Machado" << endl << "Vitoria Araujo" << endl;
+                        cout << "Professor: Alex Luciano" << endl;
+                        cout << "Quer jogar novamente?" << endl;
+                        cout << "Digite 1 para jogar de novo ou 0 para sair" << endl;
+                        cin >> repetir;
                         if (repetir == 1) {
-                            fase =1;
+                            fase = 1;
+                        }
+                        else {
+                            string nome_atual;
+                            cout << "Nick do jogador: ";
+                            cin >> nome_atual;
+
+                            // Atualiza e mostra o ranking
+                            atualizarMostrarRanking(nome_atual, p1.pontuacao);
                         }
                     }
 
@@ -974,12 +1063,31 @@ int main()
                 cout<<"para melhorar suas chances de sobrevivencia."<<endl;
                 cout<<endl<<endl;
                 cout<<"Pontuacao:"<<endl<<endl;
-                cout<<"Sistema de Pontuacao";
+                cout<<"- Cada inimigo que você derrotar lhe dara 50 pontos."<<endl;
+                cout<<"- Derrotar o Boss lhe dara 100 pontos."<<endl;
+                cout<<"- Caixas aleatorias espalhadas pelo cenario lhe darao 5 pontos cada."<<endl;
+                cout<<"Mas cuidado! Ha penalidades por usar muitas bombas ou fazer muitos movimentos: "<<endl;
+                cout<<"- Se voce usar mais de 8 bombas em uma fase, perdera 10 pontos por fase que passar."<<endl;
+                cout<<"- Se usar mais de 10 bombas, perdera 15 pontos por fase."<<endl;
+                cout<<"- Se usar mais de 15 bombas, perdera 25 pontos por fase."<<endl;
+                cout<<"Movimentos:"<<endl;
+                cout<<"- Se fizer mais de 250 movimentos em uma fase, perdera 10 pontos por fase."<<endl;
+                cout<<"- Se fizer mais de 300 movimentos, perdera 15 pontos por fase."<<endl;
+                cout<<"- Se fizer mais de 400 movimentos, perdera 25 pontos por fase."<<endl;
+                cout<<endl<<endl<<endl;
+                cout<<"Especiais:"<<endl<<endl;
+                cout<<"No mapa soltam alguns especiais destruindo caixas:"<<endl;
+                cout<<"+ : Aumenta a area da bomba."<<endl;
+                cout<<"I : Deixara você intangivel e podera passar por paredes quebraveis."<<endl;
+                cout<<"Õ : Um escudo que protege das explosoes."<<endl;
+                cout<<"æ : Controla a bomba e faz ela explodir no momento que quer."<<endl;
+                cout<<"² : Vida extra."<<endl;
                 system("pause");
                 break;
             case 4:
                 system("cls");
-                cout<<"Rank:"<<endl;
+                cout << "Rank:" << endl;
+                atualizarMostrarRanking("", -1); // -1 como valor inválido para não adicionar novo jogador
                 system("pause");
                 break;
             case 5:
