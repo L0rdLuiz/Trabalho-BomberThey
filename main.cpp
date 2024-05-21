@@ -49,6 +49,8 @@ void geraMapa(int m[13][26]) {
     m[1][1] = 0;
     m[1][2] = 0;
     m[2][1] = 0;
+    m[5][24] = 0;
+    m[4][24] = 0;
 }
 
 bool colisaoBool(int p, player& p1){
@@ -122,7 +124,7 @@ void flick(int m[13][26], int bx, int by, bomba& b1) {
     }
 }
 
-void movInimigo (int m[13][26], int &ix, int &iy,int x,int y,int dificuldade) {
+void movInimigo (int m[13][26], int &ix, int &iy,int x,int y,int dificuldade = 3) {
     int movDir;
     int chanceMovAleatorio;
 
@@ -213,6 +215,37 @@ int soltarEspeciais () {
         }
 }
 
+void pontosMorte(inimigo& i, player& p1, bool& deuPonto) {
+    if (i.iniVivo == false && deuPonto == false) {
+        p1.pontuacao += 50;
+        deuPonto = true;
+    }
+}
+
+void pontosBombaGasta(player& p1) {
+    if (p1.bombaGasta > 8) {
+        p1.pontuacao -= 10;
+    }
+    if (p1.bombaGasta > 10) {
+        p1.pontuacao -= 15;
+    }
+    if (p1.bombaGasta > 15) {
+        p1.pontuacao -= 25;
+    }
+}
+
+void pontosPorMovimento(player& p1){
+    if (p1.movUtilizado > 250) {
+        p1.pontuacao -= 10;
+    }
+    if (p1.movUtilizado > 300) {
+        p1.pontuacao -= 15;
+    }
+    if (p1.movUtilizado > 400) {
+        p1.pontuacao -= 25;
+    }
+}
+
 int main()
 {
     ///ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.movInimigo(m, ix1, iy1);
@@ -239,9 +272,9 @@ int main()
     int bombaGasta;
     int movUtilizado;
     int pontuacao;
-    auto inicioTempo = system_clock::now();
 
     do{
+        PlaySound(TEXT("inicio.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
         system("cls");
         cout << R"(
          ______     ______     __    __     ______     ______     ______     __    __     ______     __   __
@@ -251,19 +284,23 @@ int main()
           \/_____/   \/_____/   \/_/  \/_/   \/_____/   \/_____/   \/_/ /_/   \/_/  \/_/   \/_/\/_/   \/_/ \/_/
 
 )" << endl;
+        cout<<"-----------------"<<endl;
         cout<<"Jogar (1)"<<endl;
         cout<<"Dificuldade (2)"<<endl;
         cout<<"Sobre o Jogo (3)"<<endl;
         cout<<"Rank (4)"<<endl;
         cout<<"Sair (5)"<<endl;
+        cout<<"-----------------"<<endl;
         cin>>menu;
         switch(menu) {
             case 1: //Jogo
                 system("cls");
                 do{
                     system("cls");
+                    PlaySound (0,0,0);
+                    PlaySound (TEXT("musica jogo.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
                     srand (time(NULL));
-                    milliseconds intervalo(500);
+                    milliseconds intervalo(250);
                     auto inicio = high_resolution_clock::now();
                     bool bombaColocada = false;
                     bool ativaBomba = false;
@@ -274,6 +311,10 @@ int main()
                     inimigo i3;
                     inimigo i4;
                     inimigo i5;
+                    inimigo iniEsp;
+                    iniEsp.iniVivo = true;
+                    iniEsp.ix = 5;
+                    iniEsp.iy = 24;
                     if (fase == 1) {
                         p1.bombaGasta = 0;
                         p1.movUtilizado = 0;
@@ -283,6 +324,7 @@ int main()
                         p1.movUtilizado = movUtilizado;
                         p1.pontuacao = pontuacao;
                     }
+                    auto inicioTempo = system_clock::now();
                     p1.vidaExtra = 0;
                     milliseconds flick1Bomba1(1000);
                     milliseconds flick1Bomba2(2000);
@@ -295,6 +337,11 @@ int main()
                     bool ini3 = false;
                     bool ini4 = false;
                     bool ini5 = false;
+                    bool deuPonto1 = false;
+                    bool deuPonto2 = false;
+                    bool deuPonto3 = false;
+                    bool deuPonto4 = false;
+                    bool deuPonto5 = false;
 
                     int m[13][26]={ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
                                     1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
@@ -398,7 +445,20 @@ int main()
                                         }
                                         inicio = atual;
                                     }
-                                }else {
+                                }else if((i==iniEsp.ix && j==iniEsp.iy && iniEsp.iniVivo == true) && fase == 3){
+                                    cout<<char(190); //inimigo Especial
+                                    //Randomificador de quantos movimentos ele irá fazer
+                                    auto atualEsp = high_resolution_clock::now();
+                                    auto passouEsp = duration_cast<milliseconds>(atualEsp - inicio);
+                                    if (passouEsp >= intervalo) {
+                                        movInimigo(m, iniEsp.ix, iniEsp.iy,x,y);
+                                        if (iniEsp.ix == x && iniEsp.iy == y && iniEsp.iniVivo == true) {
+                                                p1.vivo = p1.vivo - 1;
+                                        }
+                                        inicio = atualEsp;
+                                    }
+                                }
+                                else {
                                     switch (m[i][j]){
                                         case 0: cout<<" "; break; //caminho
                                         case 1: cout<<char(219); break; //parede
@@ -477,6 +537,12 @@ int main()
                                         ativaBomba = true;
                                         bombaColocada = true;
                                     }
+                                case 79: case 'm': ///parar a musica
+                                        PlaySound (0,0,0);
+                                    break;
+                                case 82: case 'p': ///recomeça a musica
+                                    PlaySound(TEXT("musica jogo.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+                                    break;
                             }
                         }
 
@@ -518,7 +584,11 @@ int main()
                                                     verificarColisaoBomba(l, c, x, y, i3);
                                                     verificarColisaoBomba(l, c, x, y, i4);
                                                     verificarColisaoBomba(l, c, x, y, i5);
+                                                    verificarColisaoBomba(l, c, x, y, iniEsp);
                                                     if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        if (m[l][c] == 2) {
+                                                            p1.pontuacao += 5;
+                                                        }
                                                         m[l][c] = 6;
                                                     }
                                                     m[b1.bx][b1.by] = 6;
@@ -549,7 +619,11 @@ int main()
                                                     verificarColisaoBomba(l, c, x, y, i3);
                                                     verificarColisaoBomba(l, c, x, y, i4);
                                                     verificarColisaoBomba(l, c, x, y, i5);
+                                                    verificarColisaoBomba(l, c, x, y, iniEsp);
                                                     if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        if (m[l][c] == 2) {
+                                                            p1.pontuacao += 5;
+                                                        }
                                                         m[l][c] = 6;
                                                     }
                                                     m[b1.bx][b1.by] = 6;
@@ -580,7 +654,11 @@ int main()
                                                     verificarColisaoBomba(l, c, x, y, i3);
                                                     verificarColisaoBomba(l, c, x, y, i4);
                                                     verificarColisaoBomba(l, c, x, y, i5);
+                                                    verificarColisaoBomba(l, c, x, y, iniEsp);
                                                     if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        if (m[l][c] == 2) {
+                                                            p1.pontuacao += 5;
+                                                        }
                                                         m[l][c] = 6;
                                                     }
                                                     m[b1.bx][b1.by] = 6;
@@ -611,7 +689,11 @@ int main()
                                                     verificarColisaoBomba(l, c, x, y, i3);
                                                     verificarColisaoBomba(l, c, x, y, i4);
                                                     verificarColisaoBomba(l, c, x, y, i5);
+                                                    verificarColisaoBomba(l, c, x, y, iniEsp);
                                                     if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
+                                                        if (m[l][c] == 2) {
+                                                            p1.pontuacao += 5;
+                                                        }
                                                         m[l][c] = 6;
                                                     }
                                                     m[b1.bx][b1.by] = 6;
@@ -647,6 +729,7 @@ int main()
                                                         verificarColisaoBomba(l, c, x, y, i3);
                                                         verificarColisaoBomba(l, c, x, y, i4);
                                                         verificarColisaoBomba(l, c, x, y, i5);
+                                                        verificarColisaoBomba(l, c, x, y, iniEsp);
                                                         bombaColocada = false;
                                                         m[l][c] = 0;
                                                         m[b1.bx][b1.by] = 0;
@@ -672,6 +755,7 @@ int main()
                                                         verificarColisaoBomba(l, c, x, y, i3);
                                                         verificarColisaoBomba(l, c, x, y, i4);
                                                         verificarColisaoBomba(l, c, x, y, i5);
+                                                        verificarColisaoBomba(l, c, x, y, iniEsp);
                                                         bombaColocada = false;
                                                         m[l][c] = 0;
                                                         m[b1.bx][b1.by] = 0;
@@ -697,6 +781,7 @@ int main()
                                                         verificarColisaoBomba(l, c, x, y, i3);
                                                         verificarColisaoBomba(l, c, x, y, i4);
                                                         verificarColisaoBomba(l, c, x, y, i5);
+                                                        verificarColisaoBomba(l, c, x, y, iniEsp);
                                                         bombaColocada = false;
                                                         m[l][c] = 0;
                                                         m[b1.bx][b1.by] = 0;
@@ -722,6 +807,7 @@ int main()
                                                         verificarColisaoBomba(l, c, x, y, i3);
                                                         verificarColisaoBomba(l, c, x, y, i4);
                                                         verificarColisaoBomba(l, c, x, y, i5);
+                                                        verificarColisaoBomba(l, c, x, y, iniEsp);
                                                         bombaColocada = false;
                                                         m[l][c] = 0;
                                                         m[b1.bx][b1.by] = 0;
@@ -732,7 +818,6 @@ int main()
                                             }
                                         }
                                     }
-                                    bombaColocada = false;
                                 }
                             }
                         }
@@ -785,6 +870,8 @@ int main()
                             x = 1;
                             y = 1;
                             fase += 1;
+                            pontosBombaGasta(p1);
+                            pontosPorMovimento(p1);
                             bombaGasta = p1.bombaGasta;
                             movUtilizado = p1.movUtilizado;
                             pontuacao = p1.pontuacao;
@@ -793,23 +880,39 @@ int main()
 
                         //Sumir Portal
                         if (fase == 3) {
-                            m[11][24] =0;
+                            m[11][24] = 0;
+                        }
+
+                        //Sistema de contagem de pontuação
+                        pontosMorte(i1,p1, deuPonto1);
+                        pontosMorte(i2,p1, deuPonto2);
+                        pontosMorte(i3,p1, deuPonto3);
+                        pontosMorte(i4,p1, deuPonto4);
+                        pontosMorte(i5,p1, deuPonto5);
+
+                        //Ganhar
+                        if(fase == 3 && iniEsp.iniVivo == false) {
+                            jogo = false;
+                            break;
                         }
 
                     auto tempoAtualTimer = system_clock::now();
                     auto tempoDecorrido = duration_cast<seconds>(tempoAtualTimer - inicioTempo).count();
 
+                    cout<<"-------------------------------------------------------------------------------------------------------------------"<<endl;
                     cout<<"Bomba: "<<p1.bombaGasta<<" Movimento: "<<p1.movUtilizado<<" Pontuacao: "<<p1.pontuacao<<" Tempo: "<<tempoDecorrido;
                     //teste
                     cout<<endl<<"Distancia da bomba: "<<b1.distBomba<<" Vida: "<<p1.vivo<<" Intagibilidade: "<< p1.intangivel<<" Contra-Explosao: "<< p1.antiExplosao<< " Bomba-Relogio: "<< b1.bombaRelogio;
                     cout<<endl<<"Voce esta na fase : "<<fase;
+                    cout<<endl<<"-------------------------------------------------------------------------------------------------------------------";
                     } //fim do laco do jogo
 
 
                     system("cls");
-
-                    if (i1.iniVivo == false && i2.iniVivo == false && i3.iniVivo == false) {
-                        cout<<"Voce matou todos os inimigos e ganhou o jogo, parabéns!"<<endl;
+                    if (fase == 3 && iniEsp.iniVivo == false) {
+                        cout<<"Voce Ganhou o jogo e matou o Boss!"<<endl;
+                        cout<<"Você fez os seguintes pontos: "<<endl;
+                        cout<<"Bomba Gasta: "<<p1.bombaGasta<<" Movimento Gasto: "<<p1.movUtilizado<<" Pontuacao Feita: "<<p1.pontuacao;
                         cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
                         cout<<"Professor: Alex Luciano"<<endl;
                         cout<<"Quer jogar novamente?"<<endl;
@@ -819,6 +922,7 @@ int main()
                             fase =1;
                         }
                     }
+
                     if (p1.vivo == 0) {
                         cout<<"Voce perdeu o jogo"<<endl;
                         cout<<"Jogo feito por:"<<endl<<"Luiz Antonio Haenisch"<<endl<<"Daniel Machado"<<endl<<"Vitoria Araujo"<<endl;
@@ -834,11 +938,13 @@ int main()
                 break;
             case 2:
                 system("cls");
+                PlaySound(0,0,0);
+                PlaySound(TEXT("dificuldade.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
                 cout<<"Selecione a Dificuldade que voce quer:\n";
                 cout<<endl;
-                cout<<"Facil (1): (Os Inimigos se movem totalmente aleatorio com apenas 3 em cada fase e um final especial)"<<endl;
+                cout<<"Facil (1): (Os Inimigos se movem totalmente aleatorio com 5 em cada fase e um especial no final)"<<endl;
                 cout<<"Medio (2): (Os Inimigos se movem com 50% chance de irem ate voce com 5 em cada fase e um final especial)"<<endl;
-                cout<<"Dificil (3): (Todos os Inimigos sao especiais com 7 em cada fase)"<<endl;
+                cout<<"Dificil (3): (Todos os Inimigos sao especiais com 5 em cada fase)"<<endl;
                 cin>>dificuldade;
                 break;
             case 3:
