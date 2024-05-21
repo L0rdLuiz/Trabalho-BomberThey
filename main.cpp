@@ -8,6 +8,7 @@
 #include <thread>
 
 using namespace std;
+using namespace chrono;
 
 struct player {
     int vivo = 1;
@@ -39,7 +40,7 @@ struct bomba {
 void geraMapa(int m[13][26]) {
     for(int l = 0; l < 13; l++) {
         for (int c = 0; c < 26; c++){
-            if (m[l][c] == 0 && (rand() % 5 < 2))
+            if (m[l][c] == 0 && (rand() % 5 == 0))
             {
                 m[l][c] = 2; // Parede quebrável
             }
@@ -121,44 +122,78 @@ void flick(int m[13][26], int bx, int by, bomba& b1) {
     }
 }
 
-void movInimigo (int m[13][26], int &ix, int &iy) {
-    int movDir = rand()%4+1;
-        switch (movDir) {
-        //para cima
-        case 1:
+void movInimigo (int m[13][26], int &ix, int &iy,int x,int y,int dificuldade) {
+    int movDir;
+    int chanceMovAleatorio;
+
+    // Definindo a chance de movimento aleatório com base na dificuldade
+    switch (dificuldade) {
+        case 1: // Fácil: 100% movimento aleatório
+            chanceMovAleatorio = 100;
+            break;
+        case 2: // Médio: 50% movimento aleatório
+            chanceMovAleatorio = 50;
+            break;
+        case 3: // Difícil: 25% movimento aleatório
+            chanceMovAleatorio = 25;
+            break;
+        default:
+            chanceMovAleatorio = 100; // Padrão para fácil
+            break;
+    }
+
+    // Decidindo a direção de movimento
+    if (rand() % 100 < chanceMovAleatorio) {
+        movDir = rand() % 4 + 1; // Movimento aleatório
+    } else {
+        // Movimento em direção ao jogador
+        if (abs(x - ix) > abs(y - iy)) {
+            if (x > ix) {
+                movDir = 2; // Mover para baixo
+            } else {
+                movDir = 1; // Mover para cima
+            }
+        } else {
+            if (y > iy) {
+                movDir = 3; // Mover para a direita
+            } else {
+                movDir = 4; // Mover para a esquerda
+            }
+        }
+    }
+
+    // Executando o movimento
+    switch (movDir) {
+        case 1: // Para cima
             ix--;
-            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7 && m[ix][iy] !=8 && m[ix][iy] !=9 && m[ix][iy] !=10 && m[ix][iy] !=11) {
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] != 6 && m[ix][iy] != 7 && m[ix][iy] != 8 && m[ix][iy] != 9 && m[ix][iy] != 10 && m[ix][iy] != 11) {
                 ix++;
             }
-        break;
-        //para baixo
-        case 2:
+            break;
+        case 2: // Para baixo
             ix++;
-            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7 && m[ix][iy] !=8 && m[ix][iy] !=9 && m[ix][iy] !=10 && m[ix][iy] !=11) {
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] != 6 && m[ix][iy] != 7 && m[ix][iy] != 8 && m[ix][iy] != 9 && m[ix][iy] != 10 && m[ix][iy] != 11) {
                 ix--;
             }
-        break;
-        //para direita
-        case 3:
+            break;
+        case 3: // Para a direita
             iy++;
-            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7 && m[ix][iy] !=8 && m[ix][iy] !=9 && m[ix][iy] !=10 && m[ix][iy] !=11) {
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] != 6 && m[ix][iy] != 7 && m[ix][iy] != 8 && m[ix][iy] != 9 && m[ix][iy] != 10 && m[ix][iy] != 11) {
                 iy--;
             }
-        break;
-        //para esquerda
-        case 4:
+            break;
+        case 4: // Para a esquerda
             iy--;
-            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] !=6 && m[ix][iy] !=7 && m[ix][iy] !=8 && m[ix][iy] !=9 && m[ix][iy] !=10 && m[ix][iy] !=11) {
+            if (m[ix][iy] != 0 && m[ix][iy] != 5 && m[ix][iy] != 6 && m[ix][iy] != 7 && m[ix][iy] != 8 && m[ix][iy] != 9 && m[ix][iy] != 10 && m[ix][iy] != 11) {
                 iy++;
             }
-        break;
-        }
+            break;
+    }
 }
 
-void verificarColisaoBomba(int l, int c, int x, int y, inimigo& i, player& p1) {
+void verificarColisaoBomba(int l, int c, int x, int y, inimigo& i) {
     if ((l == i.ix && c == i.iy) || (i.ix == x && i.iy == y)) {
         i.iniVivo = false;
-        p1.pontuacao += 100;
     }
 }
 
@@ -201,6 +236,10 @@ int main()
     int dificuldade = 1;
     int repetir = 1;
     int fase = 1;
+    int bombaGasta;
+    int movUtilizado;
+    int pontuacao;
+    auto inicioTempo = system_clock::now();
 
     do{
         system("cls");
@@ -223,7 +262,6 @@ int main()
                 system("cls");
                 do{
                     system("cls");
-                    using namespace chrono;
                     srand (time(NULL));
                     milliseconds intervalo(500);
                     auto inicio = high_resolution_clock::now();
@@ -236,17 +274,22 @@ int main()
                     inimigo i3;
                     inimigo i4;
                     inimigo i5;
-                    p1.bombaGasta = 0;
-                    p1.movUtilizado = 0;
+                    if (fase == 1) {
+                        p1.bombaGasta = 0;
+                        p1.movUtilizado = 0;
+                        p1.pontuacao = 0;
+                    } else {
+                        p1.bombaGasta = bombaGasta;
+                        p1.movUtilizado = movUtilizado;
+                        p1.pontuacao = pontuacao;
+                    }
                     p1.vidaExtra = 0;
-                    p1.pontuacao = 0;
                     milliseconds flick1Bomba1(1000);
                     milliseconds flick1Bomba2(2000);
                     milliseconds intervaloBomba(3000);
                     milliseconds flickExplosao(3500);
                     auto inicioBomba = high_resolution_clock::now();
                     bool jogo = true; // loop do jogo para o menu depois
-                    auto inicioTempo = system_clock::now();
                     bool ini1 = false;
                     bool ini2 = false;
                     bool ini3 = false;
@@ -329,27 +372,27 @@ int main()
                                     auto passou = duration_cast<milliseconds>(atual - inicio);
                                     if (passou >= intervalo) {
                                         //Inimigo 1
-                                        movInimigo(m, i1.ix, i1.iy);
+                                        movInimigo(m, i1.ix, i1.iy,x,y,dificuldade);
                                         if (i1.ix == x && i1.iy == y && i1.iniVivo == true) {
                                                 p1.vivo = p1.vivo - 1;
                                         }
                                         //Inimigo 2
-                                        movInimigo(m, i2.ix, i2.iy);
+                                        movInimigo(m, i2.ix, i2.iy,x,y, dificuldade);
                                         if (i2.ix == x && i2.iy == y && i2.iniVivo == true) {
                                                 p1.vivo = p1.vivo - 1;
                                         }
                                         //Inimigo 3
-                                        movInimigo(m, i3.ix, i3.iy);
+                                        movInimigo(m, i3.ix, i3.iy,x,y, dificuldade);
                                         if (i3.ix == x && i3.iy == y && i3.iniVivo == true) {
                                                 p1.vivo = p1.vivo - 1;
                                         }
                                         //Inimigo 4
-                                        movInimigo(m, i4.ix, i4.iy);
+                                        movInimigo(m, i4.ix, i4.iy,x,y, dificuldade);
                                         if (i4.ix == x && i4.iy == y && i4.iniVivo == true) {
                                                 p1.vivo = p1.vivo - 1;
                                         }
                                         //Inimigo 5
-                                        movInimigo(m, i5.ix, i5.iy);
+                                        movInimigo(m, i5.ix, i5.iy,x,y, dificuldade);
                                         if (i5.ix == x && i5.iy == y && i5.iniVivo == true) {
                                                 p1.vivo = p1.vivo - 1;
                                         }
@@ -470,11 +513,11 @@ int main()
                                                             }
                                                         }
                                                     }
-                                                    verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i4, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i5, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i1);
+                                                    verificarColisaoBomba(l, c, x, y, i2);
+                                                    verificarColisaoBomba(l, c, x, y, i3);
+                                                    verificarColisaoBomba(l, c, x, y, i4);
+                                                    verificarColisaoBomba(l, c, x, y, i5);
                                                     if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
                                                         m[l][c] = 6;
                                                     }
@@ -501,11 +544,11 @@ int main()
                                                             }
                                                         }
                                                     }
-                                                    verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i4, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i5, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i1);
+                                                    verificarColisaoBomba(l, c, x, y, i2);
+                                                    verificarColisaoBomba(l, c, x, y, i3);
+                                                    verificarColisaoBomba(l, c, x, y, i4);
+                                                    verificarColisaoBomba(l, c, x, y, i5);
                                                     if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
                                                         m[l][c] = 6;
                                                     }
@@ -532,11 +575,11 @@ int main()
                                                             }
                                                         }
                                                     }
-                                                    verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i4, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i5, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i1);
+                                                    verificarColisaoBomba(l, c, x, y, i2);
+                                                    verificarColisaoBomba(l, c, x, y, i3);
+                                                    verificarColisaoBomba(l, c, x, y, i4);
+                                                    verificarColisaoBomba(l, c, x, y, i5);
                                                     if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
                                                         m[l][c] = 6;
                                                     }
@@ -563,11 +606,11 @@ int main()
                                                             }
                                                         }
                                                     }
-                                                    verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i4, p1);
-                                                    verificarColisaoBomba(l, c, x, y, i5, p1);
+                                                    verificarColisaoBomba(l, c, x, y, i1);
+                                                    verificarColisaoBomba(l, c, x, y, i2);
+                                                    verificarColisaoBomba(l, c, x, y, i3);
+                                                    verificarColisaoBomba(l, c, x, y, i4);
+                                                    verificarColisaoBomba(l, c, x, y, i5);
                                                     if (m[l][c] != 7 && m[l][c] != 8 && m[l][c] != 9 && m[l][c] != 10 && m[l][c] != 11 && m[l][c] != 12) {
                                                         m[l][c] = 6;
                                                     }
@@ -599,11 +642,11 @@ int main()
                                                                 }
                                                             }
                                                         }
-                                                        verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i4, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i5, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i1);
+                                                        verificarColisaoBomba(l, c, x, y, i2);
+                                                        verificarColisaoBomba(l, c, x, y, i3);
+                                                        verificarColisaoBomba(l, c, x, y, i4);
+                                                        verificarColisaoBomba(l, c, x, y, i5);
                                                         bombaColocada = false;
                                                         m[l][c] = 0;
                                                         m[b1.bx][b1.by] = 0;
@@ -624,11 +667,11 @@ int main()
                                                                 }
                                                             }
                                                         }
-                                                        verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i4, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i5, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i1);
+                                                        verificarColisaoBomba(l, c, x, y, i2);
+                                                        verificarColisaoBomba(l, c, x, y, i3);
+                                                        verificarColisaoBomba(l, c, x, y, i4);
+                                                        verificarColisaoBomba(l, c, x, y, i5);
                                                         bombaColocada = false;
                                                         m[l][c] = 0;
                                                         m[b1.bx][b1.by] = 0;
@@ -649,11 +692,11 @@ int main()
                                                                 }
                                                             }
                                                         }
-                                                        verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i4, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i5, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i1);
+                                                        verificarColisaoBomba(l, c, x, y, i2);
+                                                        verificarColisaoBomba(l, c, x, y, i3);
+                                                        verificarColisaoBomba(l, c, x, y, i4);
+                                                        verificarColisaoBomba(l, c, x, y, i5);
                                                         bombaColocada = false;
                                                         m[l][c] = 0;
                                                         m[b1.bx][b1.by] = 0;
@@ -674,11 +717,11 @@ int main()
                                                                 }
                                                             }
                                                         }
-                                                        verificarColisaoBomba(l, c, x, y, i1, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i2, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i3, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i4, p1);
-                                                        verificarColisaoBomba(l, c, x, y, i5, p1);
+                                                        verificarColisaoBomba(l, c, x, y, i1);
+                                                        verificarColisaoBomba(l, c, x, y, i2);
+                                                        verificarColisaoBomba(l, c, x, y, i3);
+                                                        verificarColisaoBomba(l, c, x, y, i4);
+                                                        verificarColisaoBomba(l, c, x, y, i5);
                                                         bombaColocada = false;
                                                         m[l][c] = 0;
                                                         m[b1.bx][b1.by] = 0;
@@ -742,6 +785,9 @@ int main()
                             x = 1;
                             y = 1;
                             fase += 1;
+                            bombaGasta = p1.bombaGasta;
+                            movUtilizado = p1.movUtilizado;
+                            pontuacao = p1.pontuacao;
                             break;
                         }
 
